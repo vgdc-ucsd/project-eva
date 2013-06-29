@@ -1,0 +1,30 @@
+#!/bin/perl
+use File::Spec::Functions;
+use File::Basename;
+use File::Copy;
+use Cwd 'realpath';
+
+require '.git/hooks/functions.pl';
+
+$DBPATH = getDBDir();
+
+@COMMITTED = `git diff --name-only HEAD^ HEAD`;
+@FILETYPES = getFileTypes();
+
+foreach(@COMMITTED) {	
+	my $file = $_;
+	chomp($file);
+	my ($ext) = $file =~ /(\.[^.]+)$/;
+	foreach(@FILETYPES) {
+		my $type = $_;
+		if($ext eq $type) {
+			my $GETPATH = catdir($DBPATH, $file);
+			copy($GETPATH, $file); #Copy the file back to the user's directory
+			`git update-index --assume-unchanged $file`; #Ignore the file.
+		}
+	}
+}
+
+# Expire and prune any objects git added that are no longer valid
+`git reflog expire --expire=now`;
+`git gc --prune=now`;
