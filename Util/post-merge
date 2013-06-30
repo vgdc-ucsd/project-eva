@@ -13,4 +13,4 @@ $ASSETSDIR = catpath($DBPATH, "Assets");
 `cp -ru \"$ASSETSDIR\" .`;
 
 # Set all files to assume-unchanged so we don't trigger another git commit
-`git ls-files | tr '\n' '\0' | xargs -0 git update-index --assume-unchanged`;
+`git ls-files | tr '\\n' '\\0' | xargs -0 git update-index --assume-unchanged`;
