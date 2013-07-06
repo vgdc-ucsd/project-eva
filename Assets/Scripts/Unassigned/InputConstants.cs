@@ -9,4 +9,5 @@ public class InputConstants{
 	public const string Yaw = "Yaw";
 	public const string Roll = "Roll";
 	public const string Brakes = "Brakes";
+	public const string Boost = "Boost";
 }
