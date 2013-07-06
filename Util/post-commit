@@ -20,7 +20,6 @@ foreach(@COMMITTED) {
 		if($ext eq $type) {
 			my $GETPATH = catdir($DBPATH, $file);
 			copy($GETPATH, $file); #Copy the file back to the user's directory
-			`git update-index --assume-unchanged $file`; #Ignore the file.
 		}
 	}
 }

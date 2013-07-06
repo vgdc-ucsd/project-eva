@@ -33,8 +33,7 @@ foreach( @STAGED ) {
 			open(my $F, ">>$file") or die "Couldn't reopen touched file during commit";
 			$DATE = `date`;
 			print $F $DATE;
+			`git add \"$file\"`;
 		}
 	}
 }
-# Add all of the new placeholder files
-`git add .`;

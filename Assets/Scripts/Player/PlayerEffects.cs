@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(ParticleSystem))]
 public class PlayerEffects : MonoBehaviour {
 	
 	public int trailIntensity = 30;
@@ -12,11 +13,11 @@ public class PlayerEffects : MonoBehaviour {
 		lightTrail.emissionRate = 0;
 	}
 
-	public void startLightTrail() {
+	public void StartLightTrail() {
 		lightTrail.emissionRate = trailIntensity;
 	}
 
-	public void stopLightTrail() {
+	public void StopLightTrail() {
 		lightTrail.emissionRate = 0;
 	}
 }

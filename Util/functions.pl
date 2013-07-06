@@ -43,4 +43,9 @@ sub getFileTypes
 	return ('.png', '.PNG', '.tga', '.TGA', '.fbx', '.FBX', '.mp3', '.MP3', '.ogg', '.OGG', '.mat', '.MAT');
 }
 
+sub getSearchString
+{
+	return "*" . join(' *', @FILETYPES);
+}
+
 1;
