@@ -20,3 +20,10 @@ Thumbs.db
 *.unityproj
 *.sln
 *.suo
+
+*.[Pp][Nn][Gg]
+*.[Tt][Gg][Aa]
+*.[Ff][Bb][Xx]
+*.[Mm][Pp]3
+*.[Mm][Aa][Tt]
+*.[Oo][Gg][Gg]
