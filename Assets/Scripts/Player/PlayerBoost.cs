@@ -10,7 +10,7 @@ public class PlayerBoost : MonoBehaviour {
 	public float boostDuration = 1.0f;
 	public float rechargeTime = 25.0f;
 
-	private int currBoosts;
+	public int currBoosts;
 	private float currBoostTime;
 	private float currRechargeTime;
 	private bool isBoosting = false;
