@@ -13,9 +13,9 @@ if( @ARGV != 1 ) {
 
 switch ($ARGV[0]) {
 	case "--help" { displayHelp(); }
-	case "--push" { doArtPush(); exit; }
-	case "--pull" { doArtPull(); exit; }
-	case "--sync" { doArtPull(); doArtPush(); exit;}
+	case "push" { doArtPush(); exit; }
+	case "pull" { doArtPull(); exit; }
+	case "sync" { doArtPull(); doArtPush(); exit;}
 	else { displayHelp(); }
 }
 
@@ -30,9 +30,9 @@ Usage: 	art [--push][--pull][--sync]
 Use this utility to synchronize art files for project-eva between your computer
 and Dropbox. Uses system last modified time to attempt to keep newest copies of files.
 
-	--push 	Push your local changes to the art to Dropbox
-	--pull 	Pull changes from Dropbox to your local copy of the game
-	--sync 	Shorthand for a pull, then a push
+	push 	Push your local changes to the art to Dropbox
+	pull 	Pull changes from Dropbox to your local copy of the game
+	sync 	Shorthand for a pull, then a push
 
 END
 
@@ -53,7 +53,8 @@ sub doArtPull
 	$DBPATH = getDBDir();
 
 	$ASSETSDIR = catdir($DBPATH, "Assets");
-	`cp -r \"$ASSETSDIR\" .`;
+	`cp -rv \"$ASSETSDIR\" .`;
+	print "Art pulled from Dropbox";
 }
 
 sub touchConf
@@ -63,8 +64,8 @@ sub touchConf
 		# Create the conf file
 		`touch box.conf`;
 		# Check the default directory
-		if( -d "~/dropbox/project-eva" ) {
-			`echo ~/dropbox/project-eva >> project-eva`;
+		if( -d "~/Dropbox/project-eva" ) {
+			`echo ~/Dropbox/project-eva > box.conf`;
 		} else {
 			promptEnterDBFolder();
 		}
@@ -100,6 +101,7 @@ sub promptEnterDBFolder
 
 		if( -d $DBPATH ) {
 			$found += 1;
+			`echo $DBPATH > box.conf`;
 		} else {
 			print "\nSorry, I couldn't find that path. Try again";
 		}
