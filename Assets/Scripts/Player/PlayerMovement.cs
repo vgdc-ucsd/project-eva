@@ -66,8 +66,6 @@ public class PlayerMovement : MonoBehaviour {
 		float xMin = Screen.width/2 - ( crosshairImage.width/2 );
 		float yMin = Screen.height/2 - ( crosshairImage.height/2 );
 		GUI.DrawTexture(new Rect(xMin,yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
-		
-		
+		GUI.Label(new Rect(Screen.width - 100,Screen.height-50,100,50),"Boosts: " + boostController.currBoosts);	
 	}
-	
 }
