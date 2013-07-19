@@ -10,4 +10,7 @@ public class InputConstants{
 	public const string Roll = "Roll";
 	public const string Brakes = "Brakes";
 	public const string Boost = "Boost";
+	public const string Fire = "Fire";
+	public const string AltFire = "AltFire";
+	public const string Reload = "Reload";
 }
