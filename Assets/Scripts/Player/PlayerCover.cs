@@ -4,7 +4,7 @@ using System.Collections;
 public class PlayerCover : MonoBehaviour {
 
 	//This value is public knowledge
-	public int coverEngaged; // 0 if false, 1 if true
+	public bool coverEngaged;
 
 	//The min and max distance you can be from the object
 	//The defaults are just guesses so far
@@ -18,7 +18,7 @@ public class PlayerCover : MonoBehaviour {
 	// Use this for initialization
 	void Start() {
 		//cover not engaged by default
-		coverEngaged = 0;
+		coverEngaged = false;
 	}
 	
 	// Update is called once per frame
@@ -26,10 +26,10 @@ public class PlayerCover : MonoBehaviour {
 		if ( Input.GetKeyDown( KeyCode.C ) ) {
 			
 			//send out a ray
-			ray = Camera.main.ScreenPointToRay( Vector3(Screen.width * 0.5, Screen.height * 0.5, 0 ) );
+			ray = Camera.main.ScreenPointToRay( new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0 ) );
 			
 			//check for a hit
-			if ( Physics.Raycast ( ray, hit, maxRadius ) ) {
+			if ( Physics.Raycast( ray, out hit, maxRadius ) ) {
 				Debug.DrawLine( ray.origin, hit.point );
 				print("You hit somnething!");
 
@@ -37,7 +37,7 @@ public class PlayerCover : MonoBehaviour {
 				// is something we are allowed to lach on to as cover.
 				// probably add an on ray collision or something like that
 
-				coverEngaged = ( coverEngaged + 1 ) % 2;
+				coverEngaged = !coverEngaged;
 			}
 		}
 	}
