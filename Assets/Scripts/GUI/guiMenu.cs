@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class GUITest : MonoBehaviour {
+public class guiMenu : MonoBehaviour {
 
 	void OnGUI() {
 		//Background box
