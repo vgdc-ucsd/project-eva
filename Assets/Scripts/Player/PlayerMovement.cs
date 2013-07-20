@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour {
 
 
 	private PlayerBoost boostController;
+	private PlayerCover coverController;
 
 	protected void Awake() {
 		Screen.lockCursor = true;
@@ -42,6 +43,9 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
 	private void doTranslation( float tX, float tY, float tZ ) {
+		if( coverController.coverEngaged ) {
+			coverController.GetRelativeMovement( ref tX, ref tY, ref tZ );
+		}
 		rigidbody.AddRelativeForce( tX * translateForce, tY * translateForce, tZ * translateForce );
 	}
 
