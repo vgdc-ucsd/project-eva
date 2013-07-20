@@ -6,9 +6,8 @@ public class PlayerCover : MonoBehaviour {
 	//This value is public knowledge
 	public bool coverEngaged;
 
-	//The min and max distance you can be from the object
+	//The max distance you can be from the object
 	//The defaults are just guesses so far
-	public float minRadius = 5.0f;
 	public float maxRadius = 20.0f;
 
 
