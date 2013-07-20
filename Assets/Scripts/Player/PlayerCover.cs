@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(ConfigurableJoint))]
 public class PlayerCover : MonoBehaviour {
 
 	//This value is public knowledge
@@ -14,11 +15,13 @@ public class PlayerCover : MonoBehaviour {
 	private RaycastHit hit; //hit will contain the location of the hit
 	private Vector3 targetCenter;
 	private Ray ray; //ray will be the ray sent out from the center of the screen
+	private ConfigurableJoint attachJoint;
 
 	// Use this for initialization
 	void Start() {
 		//cover not engaged by default
 		coverEngaged = false;
+		attachJoint = GetComponent<ConfigurableJoint>();
 	}
 	
 	// Update is called once per frame
@@ -43,15 +46,17 @@ public class PlayerCover : MonoBehaviour {
 
 		if( coverEngaged ) {
 			Debug.DrawLine( transform.position, targetCenter );
+			
+
+			attachJoint.xMotion = ConfigurableJointMotion.Locked;
+			attachJoint.yMotion = ConfigurableJointMotion.Locked;
+			attachJoint.zMotion = ConfigurableJointMotion.Locked;
+			attachJoint.anchor = hit.transform.position;
+		} else {
+			attachJoint.xMotion = ConfigurableJointMotion.Free;
+			attachJoint.yMotion = ConfigurableJointMotion.Free;
+			attachJoint.zMotion = ConfigurableJointMotion.Free;
+			attachJoint.anchor = transform.position;
 		}
-	}
-
-	public void GetRelativeMovement( ref float tX, ref float tY, ref float tZ ) {
-		float tempX = tX;
-		float tempY = tY;
-		float tempZ = tZ;
-
-		Vector3 movementVector = new Vector3( tX, tY, tZ );
-
 	}
 }
