@@ -6,8 +6,26 @@ public class CQB22_Shotgun : Weapon_Stats {
 	public float shotgunPellets;
 
 	public GameObject debris;
-	void awake () {
+	void Awake () {
+
+		player = GameObject.Find( "PlayerAndCamera" );
+
 		shotgunPellets = 10.0f;
+		swapRate = 1.0f;
+		reloadRate = 2.5f;
+		coolDown = 0.5f;
+		maxAmmo = 4.0f;
+		maxSpare = 24.0f;
+		range = 100000.0f;
+		damage = 5.0f;
+		bulletSpread = 0.01f;
+		bulletCircleRadius = 5.0f;
+
+		WeaponAwake();
+	}
+
+	void Start() {
+		WeaponStart();
 	}
 
 	// Update is called once per frame

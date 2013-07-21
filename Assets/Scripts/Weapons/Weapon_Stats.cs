@@ -13,8 +13,6 @@ public class Weapon_Stats : MonoBehaviour {
 	protected float bulletSpread;
 	protected float bulletCircleRadius;
 
-	protected float currentAmmo;
-
 	protected GameObject player;
 	protected RaycastHit hitInfo;
 
@@ -23,10 +21,31 @@ public class Weapon_Stats : MonoBehaviour {
 	protected bool isSwapping;
 	protected bool altFire;
 
+	protected float currentAmmo;
 	protected float currentReloadRate;
 	protected float currentSpareAmmo;
 	protected float currentSwapRate;
 	protected float currentCoolDown;
+
+	protected void WeaponAwake() {
+		isReloading = false;
+		hasAmmo = true;
+		isSwapping = true;
+		altFire = false;
+
+		currentAmmo = maxAmmo;
+		currentReloadRate = reloadRate;
+		currentSpareAmmo = maxSpare;
+		currentSwapRate = swapRate;
+		currentCoolDown = coolDown;
+	}
+
+	protected void WeaponStart() {
+		currentCoolDown = coolDown;
+		currentReloadRate = reloadRate;
+		currentSwapRate = swapRate;
+		isSwapping = true;
+	}
 
 	protected void IsReloadingCheck () {
 		if ( isReloading ) {

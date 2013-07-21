@@ -29,22 +29,17 @@ public class ARV80_Rifle : Weapon_Stats {
 		bulletSpread = 0.01f;
 		bulletCircleRadius = 1.0f;
 
-		isReloading = false;
-		hasAmmo = true;
-		isSwapping = true;
-		altFire = false;
-
-		currentAmmo = maxAmmo;
-		currentReloadRate = reloadRate;
-		currentSpareAmmo = maxSpare;
-		currentCoolDown = coolDown;
-		currentSwapRate = swapRate;
+		WeaponAwake();
 	}
 
+	void Start() {
+		WeaponStart();
+	}
 	void Update () {
 
 		//when swapping to this weapon initiates cooldown for weapon swap
 		IsSwappingCheck();
+		IsReloadingCheck();
 
 		//changing burstfire
 		if ( Input.GetButtonDown( InputConstants.AltFire ) ) {
@@ -68,8 +63,6 @@ public class ARV80_Rifle : Weapon_Stats {
 			( Input.GetButtonDown( InputConstants.Reload ) && currentAmmo != maxAmmo && currentSpareAmmo > 0 ) ) {
 			Reload();
 		}
-
-		IsReloadingCheck();
 	}
 
 	//handles burst fire shooting
