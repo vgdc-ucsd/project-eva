@@ -180,7 +180,6 @@ public class ARV80_Rifle : MonoBehaviour {
 			//creating the bullet, origin is camera
 			Ray ray = new Ray( Camera.main.transform.position , rayDirection );
 
-
 			//returns true if hits collider, false if nothing hit
 			if ( Physics.Raycast( ray , out hitInfo , RANGE ) ) {
 				//coordinates of hit
