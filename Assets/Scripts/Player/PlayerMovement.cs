@@ -11,8 +11,6 @@ public class PlayerMovement : MonoBehaviour {
 	public float brakesForce = 0.03f;
 	public float translateBrakeDeadzone = 0.2f;
 	public float rotationBrakeDeadzone = 0.3f;
-	public Texture2D crosshairImage;
-
 
 	private PlayerBoost boostController;
 
@@ -59,13 +57,5 @@ public class PlayerMovement : MonoBehaviour {
 		if( rigidbody.angularVelocity.magnitude < rotationBrakeDeadzone ) {
 			rigidbody.angularVelocity = Vector3.zero;
 		}
-	}
-	
-	void OnGUI() {
-		
-		float xMin = Screen.width/2 - ( crosshairImage.width/2 );
-		float yMin = Screen.height/2 - ( crosshairImage.height/2 );
-		GUI.DrawTexture(new Rect(xMin,yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
-		GUI.Label(new Rect(Screen.width - 100,Screen.height-50,100,50),"Boosts: " + boostController.currBoosts);	
 	}
 }

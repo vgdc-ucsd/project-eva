@@ -24,13 +24,14 @@ public class ARV80_Rifle : MonoBehaviour {
 
 	//bullet hit graphic: bullethole etc.
 	public GameObject DEBRIS_PREFAB;
+	public GameObject EFFECT;
 
 	//mutatable variables
 	private float currentSwapRate;
 	private float currentCoolDown;
 	private float currentReloadRate;
-	private float currentAmmo;
-	private float currentSpareAmmo;
+	public float currentAmmo;
+	public float currentSpareAmmo;
 	private float currentBurstFireCoolDown;
 	private float currentBurstFireToggleRate;
 
@@ -88,7 +89,7 @@ public class ARV80_Rifle : MonoBehaviour {
 			BurstFireShooting();
 		}
 		
-		Debug.Log( "Ammo: " + currentAmmo + " Spare: " + currentSpareAmmo );
+		//Debug.Log( "Ammo: " + currentAmmo + " Spare: " + currentSpareAmmo );
 
 		//allows you to reload if you run out of ammo and you click once; or if you press R and you don't have max ammo
 		if ( ( Input.GetButtonDown( InputConstants.Fire ) && !hasAmmo && currentSpareAmmo > 0) || 
@@ -179,7 +180,6 @@ public class ARV80_Rifle : MonoBehaviour {
 			//creating the bullet, origin is camera
 			Ray ray = new Ray( Camera.main.transform.position , rayDirection );
 
-
 			//returns true if hits collider, false if nothing hit
 			if ( Physics.Raycast( ray , out hitInfo , RANGE ) ) {
 				//coordinates of hit
@@ -192,7 +192,7 @@ public class ARV80_Rifle : MonoBehaviour {
 
 				if ( hitObject.tag == "Enemy" ) {
 					//damage enemy
-					//enemy.receiveDamage(damage);
+					hitObject.transform.SendMessage("receiveDamage",DAMAGE, SendMessageOptions.DontRequireReceiver);
 				}
 
 				if ( hitObject.tag == "Cover" ) {
@@ -205,6 +205,12 @@ public class ARV80_Rifle : MonoBehaviour {
 					Instantiate( DEBRIS_PREFAB , hitPoint , Quaternion.identity );
 				}
 				Debug.DrawLine( player.transform.position , hitPoint );
+				
+				//show bullet hit effect
+				if ( EFFECT != null ) {
+					GameObject particleClone = Instantiate(EFFECT,hitPoint,Quaternion.LookRotation(hitInfo.normal)) as GameObject;
+					Destroy(particleClone.gameObject,2); 	
+				}
 			}
 
 			currentAmmo--;
