@@ -15,10 +15,12 @@ public class PlayerMovement : MonoBehaviour {
 
 
 	private PlayerBoost boostController;
+	private PlayerCover coverController;
 
 	protected void Awake() {
 		Screen.lockCursor = true;
 		boostController = GetComponent<PlayerBoost>();
+		coverController = GetComponent<PlayerCover>();
 	}
 
 	protected void FixedUpdate() {
