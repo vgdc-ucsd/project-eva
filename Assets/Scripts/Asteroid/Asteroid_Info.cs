@@ -5,7 +5,7 @@ public class Asteroid_Info : MonoBehaviour
 {
 
 	//Health
-	public float hitPoints = 200.0f;
+	public float hitPoints = 50.0f;
 
 	void Update()
 	{
