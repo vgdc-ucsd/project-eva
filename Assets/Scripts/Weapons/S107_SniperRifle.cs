@@ -1,72 +1,40 @@
 using UnityEngine;
 using System.Collections;
 
-public class S107_SniperRifle : MonoBehaviour {
+public class S107_SniperRifle : Weapon_Stats {
+	public float regCamView; //original camera view
+	public float zoomMultiplier; //Zoom 7x (1/7)
 
-	//when you first swap to this weapon
-	public float SWAP_RATE = 1.0f;
+	private bool isOnCoolDown;
+	private bool shotFired;
 
-	//No actual shot cooldown for Sniper
-	public float SNIPER_SHOT_COOLDOWN = 1.0f;
+	public GameObject debris;
 
-	//weapon stats variables
-	public float MAX_AMMO = 1.0f;
-	public float MAX_SPARE = 2.0f;
-	public float RELOAD_RATE = 4.0f;
-	public float RANGE = 100000.0f;
-	public float DAMAGE = 75.0f;
-	public float BULLET_SPREAD = 0.01f;
-	public float BULLET_SPREAD_CIRCLE = 0.25f; //default is 1
+	void Awake() {
+		player = GameObject.Find( "PlayerAndCamera" );
 
-	//burst fire variables
-	public float ZOOM_TOGGLERATE = 0.5f;
-	public float REG_CAMVIEW = 60.0f; //original camera view
-	public float ZOOM_MULTIPLIER = 0.14285f; //Zoom 7x (1/7)
-	public bool zoom = false;
+		swapRate = 1.0f;
+		reloadRate = 4.0f;
+		coolDown = 1.0f;
+		maxAmmo = 1.0f;
+		maxSpare = 4.0f;
+		range = 100000.0f;
+		damage = 75.0f;
+		bulletSpread = 0.01f;
+		bulletCircleRadius = 0.5f;
 
-	//bullet hit graphic: bullethole etc.
-	public GameObject DEBRIS_PREFAB;
+		regCamView = 60.0f;
+		zoomMultiplier = 0.14285f;
 
-	//mutatable variables
-	private float currentSwapRate;
-	//private float currentCoolDown;
-	private float currentReloadRate;
-	private float currentAmmo;
-	private float currentSpareAmmo;
-	private float currentCoolDown;
+		//Weapon_Stats.cs
+		WeaponAwake();
 
-	//check variables
-	private bool hasAmmo = true;
-	private bool isReloading = false;
-	private bool isSwapping = true;
-	private bool isInitialized = false;
-	private bool isOnCoolDown = false;
-	private bool shotFired = false;
-
-	private RaycastHit hitInfo;
-
-	//access player transform.position
-	private GameObject player;
+		shotFired = false;
+	}
 
 	void Start() {
-		player = GameObject.Find( "PlayerAndCamera" );
-		TimerInitialization();
-
-		if ( !isInitialized ) {
-			WeaponInitialization();
-		}
-	}
-
-	private void TimerInitialization() {
-		currentSwapRate = SWAP_RATE;
-		currentReloadRate = 0;
-		currentCoolDown = SNIPER_SHOT_COOLDOWN;
-	}
-
-	private void WeaponInitialization() {
-		currentAmmo = 1.0f;
-		currentSpareAmmo = 2.0f;
-		isInitialized = true;
+		Camera.main.fieldOfView = regCamView;
+		WeaponStart();
 	}
 
 	void Update() {
@@ -77,7 +45,7 @@ public class S107_SniperRifle : MonoBehaviour {
 
 		//changing burstfire
 		if ( Input.GetButtonDown( InputConstants.AltFire ) ) {
-			zoom = ZoomToggle();
+			altFire = ZoomToggle();
 		}
 
 		//initial check for burst fire, ammo, swap cooldown and reload cooldown
@@ -89,7 +57,7 @@ public class S107_SniperRifle : MonoBehaviour {
 
 		//allows you to reload if you run out of ammo and you click once; or if you press R and you don't have max ammo
 		if ( ( Input.GetButtonDown( InputConstants.Fire ) && !hasAmmo && currentSpareAmmo > 0 && isOnCoolDown ) ||
-			( Input.GetButtonDown( InputConstants.Reload ) && currentAmmo != MAX_AMMO && currentSpareAmmo > 0 && isOnCoolDown ) ) {
+			( Input.GetButtonDown( InputConstants.Reload ) && currentAmmo != maxAmmo && currentSpareAmmo > 0 && isOnCoolDown ) ) {
 			Reload();
 		}
 
@@ -99,52 +67,13 @@ public class S107_SniperRifle : MonoBehaviour {
 
 	}
 
-	//check to see if player is in reload animation
-	private void IsReloadingCheck() {
-		if ( isReloading ) {
-			currentReloadRate -= Time.deltaTime;
-			if ( currentReloadRate <= 0 ) {
-				isReloading = false;
-			}
-		}
-	}
-
-	//handles reloading 
-	private void Reload() {
-		//play reload animation
-		//play reload sound? etc.
-		currentReloadRate = RELOAD_RATE;
-
-		//currentSpareAmmo -= ( maxAmmo - currentAmmo );
-		if ( ( currentSpareAmmo - ( MAX_AMMO - currentAmmo ) ) < 0 ) {
-			currentAmmo = currentSpareAmmo;
-			currentSpareAmmo = 0;
-		} else {
-			currentSpareAmmo -= ( MAX_AMMO - currentAmmo );
-			currentAmmo += ( MAX_AMMO - currentAmmo );
-		}
-
-		hasAmmo = true;
-		isReloading = true;
-	}
-
-	//check to see if player swapped to this weapon
-	private void IsSwappingCheck() {
-		if ( isSwapping ) {
-			currentSwapRate -= Time.deltaTime;
-			if ( currentSwapRate <= 0 ) {
-				isSwapping = false;
-			}
-		}
-	}
-
 	//handles burst fire toggle on off
 	private bool ZoomToggle() {
-		if ( !zoom ) {
-			Camera.main.fieldOfView = Camera.main.fieldOfView * ZOOM_MULTIPLIER;
+		if ( !altFire) {
+			Camera.main.fieldOfView = Camera.main.fieldOfView * zoomMultiplier;
 			return true;
 		} else {
-			Camera.main.fieldOfView = REG_CAMVIEW;
+			Camera.main.fieldOfView = regCamView;
 			return false;
 		}
 	}
@@ -158,12 +87,12 @@ public class S107_SniperRifle : MonoBehaviour {
 
 		if ( Input.GetButtonDown( InputConstants.Fire ) ) {
 			//randomgenerate coordinates to imitate bullet spread, default circle radius is 1.0f
-			Vector2 bulletSpreadCircle = Random.insideUnitCircle * BULLET_SPREAD_CIRCLE;
+			Vector2 bulletSpreadCircle = Random.insideUnitCircle * bulletCircleRadius;
 
 			//adjusted bullet direction with bulletspread
 			Vector3 rayDirection = new Vector3(
-				player.transform.forward.x + ( BULLET_SPREAD * bulletSpreadCircle.x ),
-				player.transform.forward.y + ( BULLET_SPREAD * bulletSpreadCircle.y ),
+				player.transform.forward.x + ( bulletSpread * bulletSpreadCircle.x ),
+				player.transform.forward.y + ( bulletSpread * bulletSpreadCircle.y ),
 				Camera.main.transform.forward.z );
 
 			//creating the bullet, origin is camera
@@ -171,7 +100,7 @@ public class S107_SniperRifle : MonoBehaviour {
 
 
 			//returns true if hits collider, false if nothing hit
-			if ( Physics.Raycast( ray, out hitInfo, RANGE ) ) {
+			if ( Physics.Raycast( ray, out hitInfo, range ) ) {
 				//coordinates of hit
 				Vector3 hitPoint = hitInfo.point;
 				//Debug.Log("Hit Point: " + hitPoint);
@@ -191,8 +120,8 @@ public class S107_SniperRifle : MonoBehaviour {
 				}
 
 				//show bullet hit particles
-				if ( DEBRIS_PREFAB != null ) {
-					Instantiate( DEBRIS_PREFAB, hitPoint, Quaternion.identity );
+				if ( debris != null ) {
+					Instantiate( debris, hitPoint, Quaternion.identity );
 				}
 				//Debug.DrawLine( player.transform.position , hitPoint );
 			}
