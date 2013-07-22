@@ -80,7 +80,7 @@ public class Weapon_Stats : MonoBehaviour {
 
 		//currentSpareAmmo -= ( maxAmmo - currentAmmo );
 		if ( ( currentSpareAmmo - ( maxAmmo - currentAmmo ) ) < 0 ) {
-			currentAmmo = currentSpareAmmo;
+			currentAmmo += currentSpareAmmo;
 			currentSpareAmmo = 0;
 		} else {
 			currentSpareAmmo -= ( maxAmmo - currentAmmo );
