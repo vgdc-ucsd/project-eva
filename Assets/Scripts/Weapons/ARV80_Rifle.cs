@@ -32,9 +32,20 @@ public class ARV80_Rifle : Weapon_Stats {
 		WeaponAwake();
 	}
 
+<<<<<<< HEAD
+	void Start () {
+		currentBurstFireCoolDown = burstFireCoolDown;
+		currentBurstFireToggleRate = burstFireToggleRate;
+
+		isReloading = false;
+		isSwapping = true;
+	}
+
+=======
 	void Start() {
 		WeaponStart();
 	}
+>>>>>>> f5faa5ae5565ab1bb39625504dfaf2f694f78fbf
 	void Update () {
 
 		//when swapping to this weapon initiates cooldown for weapon swap
