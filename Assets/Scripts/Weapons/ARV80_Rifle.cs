@@ -32,20 +32,12 @@ public class ARV80_Rifle : Weapon_Stats {
 		WeaponAwake();
 	}
 
-<<<<<<< HEAD
-	void Start () {
+	void Start() {
 		currentBurstFireCoolDown = burstFireCoolDown;
 		currentBurstFireToggleRate = burstFireToggleRate;
-
-		isReloading = false;
-		isSwapping = true;
-	}
-
-=======
-	void Start() {
 		WeaponStart();
 	}
->>>>>>> f5faa5ae5565ab1bb39625504dfaf2f694f78fbf
+
 	void Update () {
 
 		//when swapping to this weapon initiates cooldown for weapon swap
@@ -95,7 +87,7 @@ public class ARV80_Rifle : Weapon_Stats {
 			//emit bullet tracer image?
 
 			//randomgenerate coordinates to imitate bullet spread, default circle radius is 1.0f
-			Vector2 bulletSpreadCircle = Random.insideUnitCircle;
+			Vector2 bulletSpreadCircle = Random.insideUnitCircle * bulletCircleRadius;
 
 			//adjusted bullet direction with bulletspread
 			Vector3 rayDirection = new Vector3(
@@ -138,6 +130,7 @@ public class ARV80_Rifle : Weapon_Stats {
 
 			//if you run out of Ammo
 			if ( currentAmmo <= 0 ) {
+				currentAmmo = 0;
 				hasAmmo = false;
 			}
 		}
