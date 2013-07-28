@@ -8,7 +8,7 @@ public class guiMenu : MonoBehaviour {
 	private Vector2 size = new Vector2(512,256);
 	public GUIStyle myStyle;
 	
-	void Start() {
+	void Awake() {
 		logo = GameObject.Find("logo");
 		logo.transform.position = Vector3.zero;
 		logo.transform.localScale = Vector3.zero;
@@ -18,7 +18,7 @@ public class guiMenu : MonoBehaviour {
 	void OnGUI() {		
 		//Create button to load demo scene
 		if( GUI.Button(new Rect(0,Screen.height/2,400,50),"Launch demo scene",myStyle) ){
-			Application.LoadLevel (1);
+			Application.LoadLevel(1);
 		}
 		
 		if( GUI.Button(new Rect(0,Screen.height/2+55,400,50),"Options",myStyle) ){
