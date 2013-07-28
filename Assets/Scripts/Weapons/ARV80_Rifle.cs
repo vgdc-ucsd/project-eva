@@ -7,13 +7,14 @@ public class ARV80_Rifle : Weapon_Stats {
 	public float burstFireAmount;
 	public float burstFireToggleRate;
 
-	public GameObject debris;
-
 	private float currentBurstFireCoolDown;
 	private float currentBurstFireToggleRate;
 
+	private PlayerEffects effectsController;
+
 	void Awake () {
-		player = GameObject.Find( "PlayerAndCamera" );
+		player = transform.parent.gameObject;
+		effectsController = transform.parent.GetComponent<PlayerEffects>();
 
 		burstFireCoolDown = 0.5f;
 		burstFireAmount = 3.0f;
@@ -117,9 +118,7 @@ public class ARV80_Rifle : Weapon_Stats {
 				}
 
 				//show bullet hit particles
-				if ( debris != null ) {
-					Instantiate( debris , hitPoint , Quaternion.identity );
-				}
+				effectsController.TriggerGunSpark( hitPoint, hitInfo.normal );
 				Debug.DrawLine( player.transform.position , hitPoint );
 			}
 

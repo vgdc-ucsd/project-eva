@@ -5,10 +5,12 @@ public class PlayerEffects : MonoBehaviour {
 	
 	public int trailIntensity = 30;
 	public float trailLifetime = 4.0f;
+	public float sparkLifetime = 1.0f;
 
 	private GameObject trailGenerator;
 	private GameObject currentTrail;
 	private TrailRenderer lightTrail;
+	private ParticleSystem gunSparks;
 	
 	private LineRenderer grappleBeam;
 
@@ -17,6 +19,7 @@ public class PlayerEffects : MonoBehaviour {
 		trailGenerator = transform.FindChild( "fx_light_trail" ).gameObject;
 		lightTrail = trailGenerator.GetComponent<TrailRenderer>();
 		grappleBeam = transform.FindChild( "fx_grapple_beam" ).GetComponent<LineRenderer>();
+		gunSparks = transform.FindChild( "fx_gun_spark" ).GetComponent<ParticleSystem>();
 	}
 
 	protected void Update() {
@@ -46,5 +49,12 @@ public class PlayerEffects : MonoBehaviour {
 
 	public void EndGrapple() {
 		grappleBeam.enabled = false;
+	}
+
+	public void TriggerGunSpark( Vector3 position, Vector3 normal ) {
+		GameObject newSparks = ( GameObject ) GameObject.Instantiate( gunSparks.gameObject, position, Quaternion.identity );
+		newSparks.transform.forward = normal;
+		newSparks.GetComponent<ParticleSystem>().enableEmission = true;
+		Destroy( newSparks, sparkLifetime );
 	}
 }
