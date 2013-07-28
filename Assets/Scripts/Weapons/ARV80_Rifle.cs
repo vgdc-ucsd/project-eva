@@ -59,8 +59,6 @@ public class ARV80_Rifle : Weapon_Stats {
 			BurstFireShooting();
 		}
 
-		Debug.Log( "Ammo: " + currentAmmo + " Spare: " + currentSpareAmmo );
-
 		//allows you to reload if you run out of ammo and you click once; or if you press R and you don't have max ammo
 		if ( ( Input.GetButtonDown( InputConstants.Fire ) && !hasAmmo && currentSpareAmmo > 0 ) ||
 			( Input.GetButtonDown( InputConstants.Reload ) && currentAmmo != maxAmmo && currentSpareAmmo > 0 ) ) {
@@ -110,8 +108,7 @@ public class ARV80_Rifle : Weapon_Stats {
 				//Debug.Log("Hit Object: " + hitObject);
 
 				if ( hitObject.tag == "Enemy" ) {
-					//damage enemy
-					//enemy.receiveDamage(damage);
+					hitObject.SendMessage("receiveDamage", damage );
 				}
 
 				if ( hitObject.tag == "Cover" ) {
