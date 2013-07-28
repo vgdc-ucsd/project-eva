@@ -17,11 +17,14 @@ public class PlayerCover : MonoBehaviour {
 	private Ray ray; //ray will be the ray sent out from the center of the screen
 	private ConfigurableJoint attachJoint;
 
+	private PlayerEffects effectsController;
+
 	// Use this for initialization
 	void Start() {
 		//cover not engaged by default
 		coverEngaged = false;
 		attachJoint = GetComponent<ConfigurableJoint>();
+		effectsController = GetComponent<PlayerEffects>();
 	}
 	
 	// Update is called once per frame
@@ -30,33 +33,29 @@ public class PlayerCover : MonoBehaviour {
 			
 			//send out a ray
 			ray = Camera.main.ScreenPointToRay( new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0 ) );
-			
-			//check for a hit
-			if ( Physics.Raycast( ray, out hit, maxRadius ) ) {
-				print("You hit somnething!");
-				targetCenter = hit.transform.position;
 
-				//TODO: Add a check to see if the object that we are in range of
-				// is something we are allowed to lach on to as cover.
-				// probably add an on ray collision or something like that
+			if ( !coverEngaged ) {
+				//check for a hit
+				if ( Physics.Raycast( ray, out hit, maxRadius ) ) {
+					targetCenter = hit.transform.position;
+					effectsController.StartGrapple( targetCenter );
 
-				coverEngaged = !coverEngaged;
+					coverEngaged = true;
+
+					attachJoint.xMotion = ConfigurableJointMotion.Locked;
+					attachJoint.yMotion = ConfigurableJointMotion.Locked;
+					attachJoint.zMotion = ConfigurableJointMotion.Locked;
+					attachJoint.anchor = hit.transform.position;
+				}
+			} else {
+				coverEngaged = false;
+				effectsController.EndGrapple();
+
+				attachJoint.xMotion = ConfigurableJointMotion.Free;
+				attachJoint.yMotion = ConfigurableJointMotion.Free;
+				attachJoint.zMotion = ConfigurableJointMotion.Free;
+				attachJoint.anchor = transform.position;
 			}
-		}
-
-		if( coverEngaged ) {
-			Debug.DrawLine( transform.position, targetCenter );
-			
-
-			attachJoint.xMotion = ConfigurableJointMotion.Locked;
-			attachJoint.yMotion = ConfigurableJointMotion.Locked;
-			attachJoint.zMotion = ConfigurableJointMotion.Locked;
-			attachJoint.anchor = hit.transform.position;
-		} else {
-			attachJoint.xMotion = ConfigurableJointMotion.Free;
-			attachJoint.yMotion = ConfigurableJointMotion.Free;
-			attachJoint.zMotion = ConfigurableJointMotion.Free;
-			attachJoint.anchor = transform.position;
 		}
 	}
 }
