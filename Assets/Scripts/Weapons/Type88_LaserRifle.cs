@@ -77,9 +77,7 @@ public class Type88_LaserRifle : Weapon_Stats {
 
 				//if hit cover tag
 
-				if ( debris != null ) {
-					Instantiate( debris, hitPoint, Quaternion.identity );
-				}
+				
 
 				Debug.DrawLine( player.transform.position, hitPoint );
 			}

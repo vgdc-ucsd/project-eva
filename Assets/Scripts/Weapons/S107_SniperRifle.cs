@@ -5,13 +5,14 @@ public class S107_SniperRifle : Weapon_Stats {
 	public float regCamView; //original camera view
 	public float zoomMultiplier; //Zoom 7x (1/7)
 
+	private PlayerEffects effectsController;
+
 	private bool isOnCoolDown;
 	private bool shotFired;
 
-	public GameObject debris;
-
 	void Awake() {
-		player = GameObject.Find( "PlayerAndCamera" );
+		player = transform.parent.gameObject;
+		effectsController = transform.parent.GetComponent<PlayerEffects>();
 
 		swapRate = 1.0f;
 		reloadRate = 4.0f;
@@ -118,9 +119,7 @@ public class S107_SniperRifle : Weapon_Stats {
 				}
 
 				//show bullet hit particles
-				if ( debris != null ) {
-					Instantiate( debris, hitPoint, Quaternion.identity );
-				}
+				effectsController.TriggerGunSpark( hitPoint, hitInfo.normal );
 				//Debug.DrawLine( player.transform.position , hitPoint );
 			}
 
