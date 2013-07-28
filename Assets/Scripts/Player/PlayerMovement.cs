@@ -13,10 +13,12 @@ public class PlayerMovement : MonoBehaviour {
 	public float rotationBrakeDeadzone = 0.3f;
 
 	private PlayerBoost boostController;
+	private PlayerCover coverController;
 
 	protected void Awake() {
 		Screen.lockCursor = true;
 		boostController = GetComponent<PlayerBoost>();
+		coverController = GetComponent<PlayerCover>();
 	}
 
 	protected void FixedUpdate() {

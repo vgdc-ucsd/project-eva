@@ -20,6 +20,8 @@ Thumbs.db
 *.unityproj
 *.sln
 *.suo
+*.pidb
+*.userprefs
 
 *.[Pp][Nn][Gg]
 *.[Tt][Gg][Aa]
@@ -27,3 +29,4 @@ Thumbs.db
 *.[Mm][Pp]3
 *.[Mm][Aa][Tt]
 *.[Oo][Gg][Gg]
+*.[Pp][Ss][Dd]
