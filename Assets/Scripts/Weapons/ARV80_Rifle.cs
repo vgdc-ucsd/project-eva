@@ -108,8 +108,7 @@ public class ARV80_Rifle : Weapon_Stats {
 				//Debug.Log("Hit Object: " + hitObject);
 
 				if ( hitObject.tag == "Enemy" ) {
-					//damage enemy
-					//enemy.receiveDamage(damage);
+					hitObject.SendMessage("receiveDamage", damage );
 				}
 
 				if ( hitObject.tag == "Cover" ) {

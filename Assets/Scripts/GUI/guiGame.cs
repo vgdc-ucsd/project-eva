@@ -7,6 +7,7 @@ public class guiGame : MonoBehaviour {
 	public Texture2D healthBar;
 	public GUIStyle HUDStyle_large;
 	public GUIStyle HUDStyle_small;
+	public GUIStyle HPCountStyle;
 	private PlayerBoost boostController;
 	private PlayerWeapons weaponController;
 	private PlayerHP healthController;
@@ -35,9 +36,10 @@ public class guiGame : MonoBehaviour {
 		GUI.Label(new Rect(Screen.width - 200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
 		GUI.Label(new Rect(Screen.width - 200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
 		
-		currWidth = 400 * (currentHealth / maxHealth);
+		currWidth = 300 * (currentHealth / maxHealth);
 		
-		GUI.Label(new Rect(0,Screen.height-75,165,18),"Armor Integrity:",HUDStyle_small);
+		GUI.Label(new Rect(0,Screen.height - 75,90,18),"Armor:",HUDStyle_small);
+		GUI.Label(new Rect(140,Screen.height - 80,30,30)," " + currentHealth,HUDStyle_large);
 		
 		GUI.BeginGroup(new Rect(20,Screen.height-50,currWidth,35));;
 		GUI.DrawTexture(new Rect(0,0,400,35),healthBar,ScaleMode.StretchToFill);

@@ -5,7 +5,6 @@ public class Asteroid_Info : MonoBehaviour
 {
 	public float hitPoints = 50.0f;
 	private float collideDamage = 10.0f;
-	public PlayerHP healthController;
 
 	void Update() {
 		if ( hitPoints <= 0 )
@@ -22,7 +21,7 @@ public class Asteroid_Info : MonoBehaviour
 		GameObject hitObject = other.gameObject;
 		
 		if ( hitObject.tag == "Player" ) {
-			healthController.receiveDamage( collideDamage );
+			hitObject.SendMessage("receiveDamage", collideDamage );
 		}
 		
 	}
