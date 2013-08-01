@@ -24,4 +24,8 @@ public class PlayerWeapons : MonoBehaviour {
 	public float GetWeaponSpareAmmo() {
 		return currentWeapon.GetSpareAmmo();
 	}
+	
+	public void SetWeaponCurrentAmmo( float ammo ) {
+		currentWeapon.SetCurrentAmmo( ammo );
+	}
 }
