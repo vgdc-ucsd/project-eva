@@ -26,7 +26,7 @@ public class guiMenu : MonoBehaviour {
 		}
 		
 		if( GUI.Button(new Rect(0,Screen.height/2+55*3,400,50),"Options",myStyle) ){
-			//Go to options screen
+			Application.LoadLevel(3);
 		}
 		
 		if( GUI.Button(new Rect(0,Screen.height/2+55*4,400,50),"Quit",myStyle) ){
