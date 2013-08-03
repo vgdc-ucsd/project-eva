@@ -25,6 +25,20 @@ public class PlayerWeapons : MonoBehaviour {
 		return currentWeapon.GetSpareAmmo();
 	}
 	
+	public float GetWeaponMaxAmmo() {
+		return currentWeapon.GetMaxAmmo();
+	}
+	
+	public float GetWeaponMaxSpare() {
+		return currentWeapon.GetMaxSpare();
+	}
+	
+	public bool IsFullCheck() {
+		if( GetWeaponCurrentAmmo() == GetWeaponMaxAmmo() && GetWeaponSpareAmmo() == GetWeaponMaxSpare() ) {
+			return true;
+		} else { return false; }
+	}
+	
 	public void SetWeaponCurrentAmmo( float ammo ) {
 		currentWeapon.SetCurrentAmmo( ammo );
 	}

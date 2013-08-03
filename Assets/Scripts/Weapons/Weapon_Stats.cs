@@ -35,6 +35,14 @@ public class Weapon_Stats : MonoBehaviour {
 		return currentSpareAmmo;
 	}
 	
+	public float GetMaxAmmo() {
+		return maxAmmo;
+	}
+	
+	public float GetMaxSpare() {
+		return maxSpare;
+	}
+	
 	public void SetCurrentAmmo( float newAmmo ) {
 		if( newAmmo > maxAmmo ) {
 			currentAmmo = maxAmmo;

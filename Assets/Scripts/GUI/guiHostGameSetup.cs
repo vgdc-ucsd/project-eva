@@ -19,7 +19,7 @@ public class guiHostGameSetup : MonoBehaviour {
 		
 		mapchoice1 = GUI.Toggle(new Rect(90,150,200,200),mapchoice1,"",map1_buttonStyle);
 		
-		if ( mapchoice1 == false ){
+		if ( ! mapchoice1 ){
 			//display grayed out launch button
 			if( GUI.Button(new Rect(Screen.width-1000,Screen.height-80,400,50),"Launch",hostNotReadyStyle) ){
 				//display message
