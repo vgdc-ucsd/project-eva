@@ -16,13 +16,21 @@ public class guiMenu : MonoBehaviour {
 	}
 	
 	void OnGUI() {		
-		//Create button to load demo scene
-		if( GUI.Button(new Rect(0,Screen.height/2,400,50),"Launch demo scene",myStyle) ){
+		//Create button to load demo scene	
+		if( GUI.Button(new Rect(0,Screen.height/2+55,400,50),"Host",myStyle) ){
 			Application.LoadLevel(1);
 		}
 		
-		if( GUI.Button(new Rect(0,Screen.height/2+55,400,50),"Options",myStyle) ){
+		if( GUI.Button(new Rect(0,Screen.height/2+55*2,400,50),"Join",myStyle) ){
+			//Go to join screen
+		}
+		
+		if( GUI.Button(new Rect(0,Screen.height/2+55*3,400,50),"Options",myStyle) ){
 			//Go to options screen
 		}
+		
+		if( GUI.Button(new Rect(0,Screen.height/2+55*4,400,50),"Quit",myStyle) ){
+			Application.Quit();
+		}	
 	}
 }
