@@ -16,6 +16,11 @@ public class guiGame : MonoBehaviour {
 	private float currentAmmo;
 	private	float spareAmmo;
 	private float currWidth;
+	private GameObject MenuMusic;
+	private GameObject BattleMusic;
+	enum Fade {In, Out};
+	float fadeOutTime = 2.0f;
+	float fadeInTime = 6.0f;
 
 	protected void Awake() {
 		boostController = GetComponent<PlayerBoost>();
@@ -23,7 +28,33 @@ public class guiGame : MonoBehaviour {
 		healthController = GetComponent<PlayerHP>();
 		maxHealth = healthController.GetMaxHP();
 	}
+	
+	void Start() {
+		MenuMusic = GameObject.FindGameObjectWithTag("MenuMusic");
+		BattleMusic = GameObject.FindGameObjectWithTag("BattleMusic");
 		
+		if( !MenuMusic.Equals(null) ) {
+			StartCoroutine(FadeAudio( MenuMusic, fadeOutTime, Fade.Out));
+		}
+		
+		if( !BattleMusic.Equals(null) ) {
+			StartCoroutine(FadeAudio( BattleMusic, fadeInTime, Fade.In));	
+		}
+	}
+		
+	IEnumerator FadeAudio (GameObject obj, float timer, Fade fadeType) {
+		float start = fadeType == Fade.In? 0.0f : 1.0f;
+		float end = fadeType == Fade.In? 1.0f : 0.0f;
+		float i = 0.0f;
+		float step = 1.0f/timer;
+		
+		while( i <= 1.0f ) {
+			i += step * Time.deltaTime;
+			obj.audio.volume = Mathf.Lerp (start, end, i);
+			yield return new WaitForSeconds(step * Time.deltaTime);
+		}
+	}
+	
 	void OnGUI() {
 		float crosshair_xMin = Screen.width/2 - ( crosshairImage.width/2 );
 		float crosshair_yMin = Screen.height/2 - ( crosshairImage.height/2 );
