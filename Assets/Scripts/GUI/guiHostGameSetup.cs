@@ -14,7 +14,7 @@ public class guiHostGameSetup : MonoBehaviour {
 	void OnGUI () {
 		
 		GUI.DrawTexture(new Rect( 20,20,Screen.width-150,Screen.height-150 ), background,ScaleMode.StretchToFill,true,0);
-		GUI.Label(new Rect(100,20,100,100),"Host Game",titleStyle);
+		GUI.Label(new Rect(80,20,100,100),"Host Game",titleStyle);
 		GUI.Label(new Rect(100,100,100,100),"Map Select",subtitleStyle);
 		
 		mapchoice1 = GUI.Toggle(new Rect(90,150,200,200),mapchoice1,"",map1_buttonStyle);
