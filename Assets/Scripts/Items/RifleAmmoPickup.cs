@@ -7,7 +7,6 @@ public class RifleAmmoPickup : MonoBehaviour {
 	public float respawnTime = 30.0f;
 	private PlayerWeapons weaponController;
 	private float curAmmo;
-	private GameObject newPickup;
 	
 	void OnTriggerEnter(Collider other) {
 		GameObject hitObject = other.gameObject;
