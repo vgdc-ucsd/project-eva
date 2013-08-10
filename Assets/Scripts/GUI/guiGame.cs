@@ -16,8 +16,10 @@ public class guiGame : MonoBehaviour {
 	private float currentAmmo;
 	private	float spareAmmo;
 	private float currWidth;
+	private string id;
 	private GameObject MenuMusic;
 	private GameObject BattleMusic;
+
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
 	float fadeInTime = 6.0f;
@@ -39,6 +41,12 @@ public class guiGame : MonoBehaviour {
 		
 		if( !BattleMusic.Equals(null) ) {
 			StartCoroutine(FadeAudio( BattleMusic, fadeInTime, Fade.In));	
+		}
+		
+		if( string.IsNullOrEmpty(PlayerOptions.playerID) ) {
+			id = "Jane Doe";	
+		} else {
+			id = PlayerOptions.playerID;	
 		}
 	}
 		
@@ -66,6 +74,7 @@ public class guiGame : MonoBehaviour {
 		GUI.DrawTexture(new Rect(crosshair_xMin,crosshair_yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
 		GUI.Label(new Rect(Screen.width - 200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
 		GUI.Label(new Rect(Screen.width - 200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
+		GUI.Label(new Rect(10,20,100,20),id,HUDStyle_small);
 		
 		currWidth = 300 * (currentHealth / maxHealth);
 		
