@@ -14,13 +14,17 @@ public class PlayerHP : MonoBehaviour {
 		return maxHealth;
 	}
 	
+	public void SetCurrentHP( float newArmor ) {
+		playerHealth = newArmor;
+	}
+	
 	void Start() {
 		playerHealth = maxHealth;
 	}
 	
 	void Update() {
 		if ( playerHealth <= 0 ) {
-			die();
+			Die();
 		}
 	}
 
@@ -28,7 +32,7 @@ public class PlayerHP : MonoBehaviour {
 		playerHealth -= damage;
 	}
 
-	private void die(){
+	private void Die(){
 		Debug.Log ("OH SHIT. You died.");
 		Screen.lockCursor = false;
 		Application.LoadLevel(0);
