@@ -71,8 +71,10 @@ public class guiGame : MonoBehaviour {
 			
 			if( isMenuOpen ) { 
 				isMenuOpen = false;
+				Screen.lockCursor = true;
 			} else { 
 				isMenuOpen = true; 
+				Screen.lockCursor = false;
 			}
 		}
 	}
