@@ -8,8 +8,6 @@ public class PlayerCover : MonoBehaviour {
 
 	//The max distance you can be from the object
 	//The defaults are just guesses so far
-	public float maxRadius = 20.0f;
-
 
 	private RaycastHit hit; //hit will contain the location of the hit
 	private Vector3 targetCenter;
@@ -34,17 +32,20 @@ public class PlayerCover : MonoBehaviour {
 
 			if ( !coverEngaged ) {
 				//check for a hit
-				if ( Physics.Raycast( ray, out hit, maxRadius ) ) {
-					coverEngaged = true;
-					targetCenter = hit.transform.position;
-					effectsController.StartGrapple( targetCenter );
-					attachJoint = gameObject.AddComponent<SpringJoint>();
-					attachJoint.anchor = targetCenter;
-					attachJoint.connectedBody = hit.rigidbody;
-					attachJoint.spring = 4;
-					attachJoint.damper = 8;
-					attachJoint.minDistance = 0;
-					attachJoint.maxDistance = .5f;
+				if ( Physics.Raycast( ray, out hit ) ) {
+					
+					if( hit.distance < 2 ) {
+						coverEngaged = true;
+						targetCenter = hit.transform.position;
+						effectsController.StartGrapple( targetCenter );
+						attachJoint = gameObject.AddComponent<SpringJoint>();
+						attachJoint.anchor = targetCenter;
+						attachJoint.connectedBody = hit.rigidbody;
+						attachJoint.spring = 4;
+						attachJoint.damper = 8;
+						attachJoint.minDistance = 0;
+						attachJoint.maxDistance = 1f;
+					}
 				}
 			} else {
 				coverEngaged = false;
