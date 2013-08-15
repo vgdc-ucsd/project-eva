@@ -67,7 +67,7 @@ public class S107_SniperRifle : Weapon_Stats {
 	}
 
 	//handles burst fire toggle on off
-	private bool ZoomToggle() {
+	public bool ZoomToggle() {
 		if ( !altFire) {
 			Camera.main.fieldOfView = Camera.main.fieldOfView * zoomMultiplier;
 			return true;
