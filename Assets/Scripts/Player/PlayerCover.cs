@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(ConfigurableJoint))]
 public class PlayerCover : MonoBehaviour {
 
 	//This value is public knowledge
@@ -15,7 +14,7 @@ public class PlayerCover : MonoBehaviour {
 	private RaycastHit hit; //hit will contain the location of the hit
 	private Vector3 targetCenter;
 	private Ray ray; //ray will be the ray sent out from the center of the screen
-	private ConfigurableJoint attachJoint;
+	private SpringJoint attachJoint;
 
 	private PlayerEffects effectsController;
 
@@ -23,7 +22,6 @@ public class PlayerCover : MonoBehaviour {
 	void Start() {
 		//cover not engaged by default
 		coverEngaged = false;
-		attachJoint = GetComponent<ConfigurableJoint>();
 		effectsController = GetComponent<PlayerEffects>();
 	}
 	
@@ -37,24 +35,21 @@ public class PlayerCover : MonoBehaviour {
 			if ( !coverEngaged ) {
 				//check for a hit
 				if ( Physics.Raycast( ray, out hit, maxRadius ) ) {
+					coverEngaged = true;
 					targetCenter = hit.transform.position;
 					effectsController.StartGrapple( targetCenter );
-
-					coverEngaged = true;
-
-					attachJoint.xMotion = ConfigurableJointMotion.Locked;
-					attachJoint.yMotion = ConfigurableJointMotion.Locked;
-					attachJoint.zMotion = ConfigurableJointMotion.Locked;
-					attachJoint.anchor = hit.transform.position;
+					attachJoint = gameObject.AddComponent<SpringJoint>();
+					attachJoint.anchor = targetCenter;
+					attachJoint.connectedBody = hit.rigidbody;
+					attachJoint.spring = 4;
+					attachJoint.damper = 8;
+					attachJoint.minDistance = 0;
+					attachJoint.maxDistance = .5f;
 				}
 			} else {
 				coverEngaged = false;
 				effectsController.EndGrapple();
-
-				attachJoint.xMotion = ConfigurableJointMotion.Free;
-				attachJoint.yMotion = ConfigurableJointMotion.Free;
-				attachJoint.zMotion = ConfigurableJointMotion.Free;
-				attachJoint.anchor = transform.position;
+				Destroy (attachJoint);
 			}
 		}
 	}
