@@ -8,12 +8,12 @@ public class PlayerCover : MonoBehaviour {
 
 	//The max distance you can be from the object
 	//The defaults are just guesses so far
-
+	private float minGrappleDistance = 2.5f;
+	
 	private RaycastHit hit; //hit will contain the location of the hit
 	private Vector3 targetCenter;
 	private Ray ray; //ray will be the ray sent out from the center of the screen
 	private SpringJoint attachJoint;
-
 	private PlayerEffects effectsController;
 
 	// Use this for initialization
@@ -34,7 +34,7 @@ public class PlayerCover : MonoBehaviour {
 				//check for a hit
 				if ( Physics.Raycast( ray, out hit ) ) {
 					
-					if( hit.distance < 2 ) {
+					if( hit.distance <= minGrappleDistance ) {
 						coverEngaged = true;
 						targetCenter = hit.transform.position;
 						effectsController.StartGrapple( targetCenter );

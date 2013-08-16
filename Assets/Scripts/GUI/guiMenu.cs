@@ -9,7 +9,6 @@ public class guiMenu : MonoBehaviour {
 	public GUIStyle enterIPtextStyle;
 	public GUIStyle enterIPStyle;
 	public string joinIP;
-	public Texture2D IPmenu;
 	private bool toggleIP = false;
 	
 	void Awake() {
