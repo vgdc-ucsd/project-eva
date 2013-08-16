@@ -5,9 +5,11 @@ public class guiGame : MonoBehaviour {
 
 	public Texture2D crosshairImage;
 	public Texture2D healthBar;
+	public Texture2D gameMenuBG;
 	public GUIStyle HUDStyle_large;
 	public GUIStyle HUDStyle_small;
 	public GUIStyle HPCountStyle;
+	public GUIStyle GameMenuStyle;
 	private PlayerBoost boostController;
 	private PlayerWeapons weaponController;
 	private PlayerHP healthController;
@@ -19,7 +21,7 @@ public class guiGame : MonoBehaviour {
 	private string id;
 	private GameObject MenuMusic;
 	private GameObject BattleMusic;
-
+	private bool isMenuOpen = false;
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
 	float fadeInTime = 6.0f;
@@ -63,7 +65,21 @@ public class guiGame : MonoBehaviour {
 		}
 	}
 	
-	void OnGUI() {
+	void Update() {
+		
+		if ( Input.GetButtonDown("GameMenu") ) {
+			
+			if( isMenuOpen ) { 
+				isMenuOpen = false;
+				Screen.lockCursor = true;
+			} else { 
+				isMenuOpen = true; 
+				Screen.lockCursor = false;
+			}
+		}
+	}
+	
+	void OnGUI() {		
 		float crosshair_xMin = Screen.width/2 - ( crosshairImage.width/2 );
 		float crosshair_yMin = Screen.height/2 - ( crosshairImage.height/2 );
 
@@ -72,8 +88,8 @@ public class guiGame : MonoBehaviour {
 		currentHealth = healthController.GetCurrentHP();
 
 		GUI.DrawTexture(new Rect(crosshair_xMin,crosshair_yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
-		GUI.Label(new Rect(Screen.width - 200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
-		GUI.Label(new Rect(Screen.width - 200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
+		GUI.Label(new Rect(Screen.width-200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
+		GUI.Label(new Rect(Screen.width-200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
 		GUI.Label(new Rect(10,20,100,20),id,HUDStyle_small);
 		
 		currWidth = 300 * (currentHealth / maxHealth);
@@ -84,5 +100,13 @@ public class guiGame : MonoBehaviour {
 		GUI.BeginGroup(new Rect(20,Screen.height-50,currWidth,35));;
 		GUI.DrawTexture(new Rect(0,0,400,35),healthBar,ScaleMode.StretchToFill);
 		GUI.EndGroup();
+			
+		if( isMenuOpen ) {
+			GUI.DrawTexture(new Rect(Screen.width-375,25,350,100),gameMenuBG,ScaleMode.StretchToFill);
+			
+			if( GUI.Button(new Rect(Screen.width-350,40,300,40),"Exit to Main Menu",GameMenuStyle) ) {
+				Application.LoadLevel(0);
+			}
+		}
 	}
 }

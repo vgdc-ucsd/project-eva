@@ -5,7 +5,6 @@ public class guiMenu : MonoBehaviour {
 	
 	private GameObject logo;
 	private Vector2 pos = new Vector2(0,450);
-	private Vector2 size = new Vector2(512,256);
 	public GUIStyle myStyle;
 	public GUIStyle enterIPtextStyle;
 	public GUIStyle enterIPStyle;
@@ -17,7 +16,7 @@ public class guiMenu : MonoBehaviour {
 		logo = GameObject.Find("logo");
 		logo.transform.position = Vector3.zero;
 		logo.transform.localScale = Vector3.zero;
-		logo.guiTexture.pixelInset = new Rect( pos.x,pos.y,size.x,size.y );
+		logo.guiTexture.pixelInset = new Rect( 0,Screen.height/2-50,512,256 );
 	}
 	
 	void OnGUI() {		

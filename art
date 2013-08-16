@@ -45,7 +45,7 @@ sub doArtPush
 	# TODO: IMPLEMENT THIS
 	$DBPATH = getDBDir();
 	$ASSETSDIR = catdir($DBPATH, "Assets");
-
+	print "ERROR: Not implemented yet\n";
 }
 
 sub doArtPull
@@ -54,7 +54,7 @@ sub doArtPull
 
 	$ASSETSDIR = catdir($DBPATH, "Assets");
 	`cp -rv \"$ASSETSDIR\" .`;
-	print "Art pulled from Dropbox";
+	print "Art pulled from Dropbox\n";
 }
 
 sub touchConf

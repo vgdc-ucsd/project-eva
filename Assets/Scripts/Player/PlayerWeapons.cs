@@ -60,6 +60,10 @@ public class PlayerWeapons : MonoBehaviour {
 		}
 		
 		if ( nextWeapon != currentWeapon ) {
+			
+			if( currentWeapon == 2 ) {
+				sniperRifleScript.ZoomToggle();		
+			}
 			currentWeapon = nextWeapon;
 			currentWeaponScript.enabled = false;
 			currentWeaponScript = weaponSlots[currentWeapon];
