@@ -11,14 +11,11 @@ public class PlayerMovement : MonoBehaviour {
 	public float brakesForce = 0.03f;
 	public float translateBrakeDeadzone = 0.2f;
 	public float rotationBrakeDeadzone = 0.3f;
-
 	private PlayerBoost boostController;
-	private PlayerCover coverController;
 
 	protected void Awake() {
 		Screen.lockCursor = true;
 		boostController = GetComponent<PlayerBoost>();
-		coverController = GetComponent<PlayerCover>();
 	}
 
 	protected void FixedUpdate() {

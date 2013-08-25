@@ -8,8 +8,8 @@ public class PlayerCover : MonoBehaviour {
 
 	//The max distance you can be from the object
 	//The defaults are just guesses so far
-	private float minGrappleDistance = 2.5f;
-	
+	private float minGrappleDistance = 3.5f;
+
 	private RaycastHit hit; //hit will contain the location of the hit
 	private Vector3 targetCenter;
 	private Ray ray; //ray will be the ray sent out from the center of the screen
@@ -40,11 +40,10 @@ public class PlayerCover : MonoBehaviour {
 						effectsController.StartGrapple( targetCenter );
 						attachJoint = gameObject.AddComponent<SpringJoint>();
 						attachJoint.anchor = targetCenter;
-						attachJoint.connectedBody = hit.rigidbody;
-						attachJoint.spring = 4;
-						attachJoint.damper = 8;
+						attachJoint.spring = .2f;
+						attachJoint.damper = 2f;
 						attachJoint.minDistance = 0;
-						attachJoint.maxDistance = 1f;
+						attachJoint.maxDistance = 0.6f;
 					}
 				}
 			} else {
