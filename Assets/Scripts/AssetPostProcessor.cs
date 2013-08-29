@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using System.Collections;
 
@@ -7,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-using UnityEngine;
 using UnityEditor;
 
 public class MaterialsPostProcessor : AssetPostprocessor {
@@ -43,5 +43,5 @@ public class MaterialsPostProcessor : AssetPostprocessor {
 			return material;
 		}
 	}
-
 }
+#endif

@@ -30,7 +30,9 @@ public class guiMenu : MonoBehaviour {
 		if( toggleIP ) {
 			GUI.Label(new Rect(560,Screen.height/2+65,200,50),"Enter the IP of the game you wish to join: ",enterIPtextStyle);
 			joinIP = GUI.TextField(new Rect(450,Screen.height/2+55*2,425,50),joinIP,enterIPStyle);
-			print (joinIP);
+			if ( GUI.Button( new Rect( 450, Screen.height / 2 + 100 * 2, 425, 50 ), "Join" ) ) {
+				NetworkManager.ConnectToServer( joinIP );
+			}
 		}
 		
 		if( GUI.Button(new Rect(0,Screen.height/2+55*3,400,50),"Options",myStyle) ){

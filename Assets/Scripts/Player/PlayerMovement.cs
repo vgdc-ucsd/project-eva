@@ -21,6 +21,12 @@ public class PlayerMovement : MonoBehaviour {
 		coverController = GetComponent<PlayerCover>();
 	}
 
+	protected void Start() {
+		if ( !networkView.isMine ) {
+			enabled = false;
+		}
+	}
+
 	protected void FixedUpdate() {
 		float tX = Input.GetAxis( InputConstants.TranslateX );
 		float tY = Input.GetAxis( InputConstants.TranslateY );
@@ -29,28 +35,28 @@ public class PlayerMovement : MonoBehaviour {
 		float dYaw = Input.GetAxis( InputConstants.Yaw );
 		float dRoll = Input.GetAxis( InputConstants.Roll );
 
-		doRotation( dPitch, dYaw, dRoll );
+		DoRotation( dPitch, dYaw, dRoll );
 
 		if( Input.GetAxis( InputConstants.Brakes ) != 0 ) {
-			doStop();
+			DoStop();
 		}
 		if( Input.GetAxis( InputConstants.Boost ) != 0 ) {
 			boostController.DoBoost( transform.forward );
 		} else {
-			doTranslation( tX, tY, tZ );
+			DoTranslation( tX, tY, tZ );
 		}
 	}
 
-	private void doTranslation( float tX, float tY, float tZ ) {
+	private void DoTranslation( float tX, float tY, float tZ ) {
 		rigidbody.AddRelativeForce( tX * translateForce, tY * translateForce, tZ * translateForce );
 	}
 
-	private void doRotation( float dP, float dY, float dR ) {
+	private void DoRotation( float dP, float dY, float dR ) {
 		rigidbody.AddRelativeTorque( 0.0f, 0.0f, dR * rotateForce );
 		transform.Rotate( dP * mouseSensitivity, dY * mouseSensitivity, 0, Space.Self );
 	}
 
-	private void doStop() {
+	private void DoStop() {
 		rigidbody.velocity = Vector3.Lerp( rigidbody.velocity, Vector3.zero, brakesForce );
 		if( rigidbody.velocity.magnitude < translateBrakeDeadzone ) {
 			rigidbody.velocity = Vector3.zero;
@@ -60,4 +66,6 @@ public class PlayerMovement : MonoBehaviour {
 			rigidbody.angularVelocity = Vector3.zero;
 		}
 	}
+
+	
 }

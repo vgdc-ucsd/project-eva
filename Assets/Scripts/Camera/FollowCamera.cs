@@ -4,10 +4,12 @@ using System.Collections;
 public class FollowCamera : MonoBehaviour {
 
 	public float smooth = 1.0f;
+	public GameObject myPlayer;
+
 	private Transform standardPos;
 
 	protected void Start () {
-		standardPos = GameObject.Find( "PlayerCameraPos" ).transform;
+		standardPos = myPlayer.transform.Find( "PlayerCameraPos" ).transform;
 	}
 
 	protected void Update () {

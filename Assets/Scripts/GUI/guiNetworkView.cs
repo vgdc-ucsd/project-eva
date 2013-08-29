@@ -9,8 +9,7 @@ public class guiNetworkView : MonoBehaviour {
 	protected void OnGUI() {
 		
 		if( !show ) return;
-		
-		Debug.Log( "Called" );
+
 		Vector2 dimensions = new Vector2( 250, 100 );
 		Vector2 position = new Vector2( Screen.width - dimensions.x - 20, 20 );
 		GUI.Box( new Rect( position.x, position.y, dimensions.x, dimensions.y ), "Network Status", networkViewStyle );
