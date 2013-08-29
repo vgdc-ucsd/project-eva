@@ -1,9 +1,9 @@
 #if UNITY_EDITOR
+
 using UnityEngine;
 using System.Collections;
 
 using System;
-using System.Collections;
 using System.Linq;
 using System.Text;
 using System.IO;
@@ -43,5 +43,7 @@ public class MaterialsPostProcessor : AssetPostprocessor {
 			return material;
 		}
 	}
+
 }
+
 #endif

@@ -4,12 +4,10 @@ using System.Collections;
 public class guiMenu : MonoBehaviour {
 	
 	private GameObject logo;
-	private Vector2 pos = new Vector2(0,450);
 	public GUIStyle myStyle;
 	public GUIStyle enterIPtextStyle;
 	public GUIStyle enterIPStyle;
 	public string joinIP;
-	public Texture2D IPmenu;
 	private bool toggleIP = false;
 	
 	void Awake() {
