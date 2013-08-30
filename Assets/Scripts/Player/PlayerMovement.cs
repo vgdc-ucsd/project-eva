@@ -42,6 +42,7 @@ public class PlayerMovement : MonoBehaviour {
 		} else {
 			DoTranslation( tX, tY, tZ );
 		}
+		networkView.RPC( "UpdatePosition", RPCMode.Others, transform.position, transform.rotation );
 	}
 
 	private void DoTranslation( float tX, float tY, float tZ ) {
@@ -64,5 +65,9 @@ public class PlayerMovement : MonoBehaviour {
 		}
 	}
 
-	
+	[RPC]
+	void UpdatePosition( Vector3 position, Quaternion rotation ) {
+		transform.position = position;
+		transform.rotation = rotation;
+	}
 }

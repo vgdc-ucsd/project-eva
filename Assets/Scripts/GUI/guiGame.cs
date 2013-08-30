@@ -105,6 +105,8 @@ public class guiGame : MonoBehaviour {
 			GUI.DrawTexture(new Rect(Screen.width-375,25,350,100),gameMenuBG,ScaleMode.StretchToFill);
 			
 			if( GUI.Button(new Rect(Screen.width-350,40,300,40),"Exit to Main Menu",GameMenuStyle) ) {
+				NetworkManager.DisconnectFromServer();
+
 				Application.LoadLevel(0);
 			}
 		}
