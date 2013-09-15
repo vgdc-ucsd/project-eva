@@ -34,6 +34,7 @@ public class PlayerEffects : MonoBehaviour {
 		currentTrail = ( GameObject )GameObject.Instantiate( trailGenerator );
 		currentTrail.name = "fx_light_trail_clone";
 		Destroy(currentTrail, trailLifetime * 2);
+		networkView.RPC( "NetworkLightTrail", RPCMode.Others, currentTrail.transform.position, currentTrail.transform.rotation );
 		lightTrail.enabled = false;
 	}
 
@@ -56,5 +57,14 @@ public class PlayerEffects : MonoBehaviour {
 		newSparks.transform.forward = normal;
 		newSparks.GetComponent<ParticleSystem>().enableEmission = true;
 		Destroy( newSparks, sparkLifetime );
+	}
+
+	[RPC]
+	public void NetworkLightTrail( Vector3 position, Quaternion rotation ) {
+		lightTrail.enabled = true;
+		currentTrail = ( GameObject )GameObject.Instantiate( trailGenerator );
+		currentTrail.name = "fx_light_trail_clone";
+		Destroy( currentTrail, trailLifetime * 2 );
+		lightTrail.enabled = false;
 	}
 }

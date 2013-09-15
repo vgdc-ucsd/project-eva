@@ -84,6 +84,7 @@ public class NetworkManager : MonoBehaviour {
 	void OnDisconnectedFromServer( NetworkDisconnection info ) {
 		if ( info == NetworkDisconnection.LostConnection ) {
 		}
+		otherPlayers.Clear();
 		Application.LoadLevel( Levels.Main );
 	}
 
