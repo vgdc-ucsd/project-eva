@@ -11,10 +11,14 @@ public class ARV80_Rifle : Weapon_Stats {
 	private float currentBurstFireToggleRate;
 
 	private PlayerEffects effectsController;
-
+	private NetworkManager networkManager;
+	private NetworkPlayer myPlayerInfo;
+	
 	void Awake () {
 		player = transform.parent.gameObject;
 		effectsController = transform.parent.GetComponent<PlayerEffects>();
+		networkManager = GameObject.FindGameObjectWithTag( Tags.NetworkController ).GetComponent<NetworkManager>();
+		myPlayerInfo = networkManager.my.playerInfo;
 
 		burstFireCoolDown = 0.5f;
 		burstFireAmount = 3.0f;
@@ -29,7 +33,8 @@ public class ARV80_Rifle : Weapon_Stats {
 		damage = 10.0f;
 		bulletSpread = 0.01f;
 		bulletCircleRadius = 1.0f;
-
+		
+		
 		WeaponAwake();
 	}
 
@@ -102,14 +107,13 @@ public class ARV80_Rifle : Weapon_Stats {
 			if ( Physics.Raycast( ray , out hitInfo , range ) ) {
 				//coordinates of hit
 				Vector3 hitPoint = hitInfo.point;
-				//Debug.Log("Hit Point: " + hitPoint);
 
 				//object hit, null if none hit
 				GameObject hitObject = hitInfo.collider.gameObject;
-				//Debug.Log("Hit Object: " + hitObject);
 
-				if ( hitObject.tag == "Enemy" ) {
-					hitObject.SendMessage("receiveDamage", damage );
+				if ( hitObject.tag == "Player" || hitObject.tag == "Enemy" ) {
+					NetworkPlayer hitPlayer = hitInfo.collider.networkView.owner;
+					transform.parent.networkView.RPC ("InflictDamage",hitPlayer,damage,myPlayerInfo);
 				}
 
 				if ( hitObject.tag == "Cover" ) {
@@ -119,7 +123,6 @@ public class ARV80_Rifle : Weapon_Stats {
 
 				//show bullet hit particles
 				effectsController.TriggerGunSpark( hitPoint, hitInfo.normal );
-				Debug.DrawLine( player.transform.position , hitPoint );
 			}
 
 			currentAmmo--;

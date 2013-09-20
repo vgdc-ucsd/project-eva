@@ -15,13 +15,13 @@ public class AsteroidGlow : MonoBehaviour {
 	}
 	
 	void OnTriggerEnter(Collider other) {
-		if( other.tag == "Player" ) {
+		if( other.tag == "Player" && other.networkView.isMine ) {
 			ParentAsteroid.renderer.material.shader = outlineShader;
 		}
 	}
 	
 	void OnTriggerExit(Collider other) {
-		if( other.tag == "Player" ) {
+		if( other.tag == "Player" && other.networkView.isMine ) {
 			ParentAsteroid.renderer.material.shader = defaultShader;
 		}
 	}

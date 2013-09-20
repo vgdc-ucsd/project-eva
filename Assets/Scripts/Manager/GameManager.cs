@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class GameManager : MonoBehaviour {
 
@@ -7,6 +8,7 @@ public class GameManager : MonoBehaviour {
 	public static bool inGame {
 		get { return _inGame; }
 	}
+	public float respawnTime = 3.0f;
 
 	public GameObject playerPrefab;
 	private static List<Transform> spawnPoints;
@@ -21,13 +23,56 @@ public class GameManager : MonoBehaviour {
 		Debug.Log( "Spawning new player" );
 
 		Transform spawn = spawnPoints[Random.Range( 0, spawnPoints.Count )];
-		GameObject playerObject = (GameObject) Network.Instantiate( playerPrefab, spawn.position, spawn.rotation, 0 );
+		GameObject playerObject = ( GameObject )Network.Instantiate( playerPrefab, spawn.position, spawn.rotation, 0 );
 		GameObject camera = GameObject.FindGameObjectWithTag( "MainCamera" );
+		
 		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
 		cameraScript.target = playerObject;
 		cameraScript.enabled = true;
 
 		return playerObject;
+	}
+	
+	// Kill a player
+	public void KillPlayer( GameObject deadPlayer ) {
+		Debug.Log( "Killing player" );		
+		GameObject camera = GameObject.FindGameObjectWithTag( "MainCamera" );
+		
+		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
+		cameraScript.enabled = false;
+		
+		deadPlayer.SetActive(false);
+		
+		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
+		mainGUI.enabled = false;
+	}
+	
+	public void RespawnPlayer( GameObject deadPlayer ) {
+		Debug.Log( "Respawning in 3 seconds..." );
+		
+		//Stop the player from moving
+		deadPlayer.rigidbody.velocity = Vector3.zero;
+		
+		//Begin wait sequence, then respawn
+		StartCoroutine( RespawnTimer( deadPlayer ) );
+	}
+	
+	IEnumerator RespawnTimer( GameObject deadPlayer ) {
+		yield return new WaitForSeconds( respawnTime );
+		
+		Transform spawn = spawnPoints[Random.Range( 0, spawnPoints.Count )];
+		GameObject camera = GameObject.FindGameObjectWithTag( "MainCamera" );
+
+		deadPlayer.transform.position = spawn.position;
+		deadPlayer.transform.rotation = spawn.rotation;
+		
+		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
+		cameraScript.enabled = true;
+		
+		deadPlayer.SetActive(true);
+		
+		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
+		mainGUI.enabled = true;	
 	}
 
 	public GameObject SpawnPlayer( Vector3 position, Quaternion rotation ) {

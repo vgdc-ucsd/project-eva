@@ -17,8 +17,14 @@ public class PlayerBoost : MonoBehaviour {
 	private bool boostKeyLifted = true;
 
 	private PlayerEffects effectsController;
-
+	
 	protected void Awake() {
+		if( ! networkView.isMine ) {
+			enabled = false;
+		}
+	}
+
+	protected void Start() {
 		effectsController = GetComponent<PlayerEffects>();
 		currBoosts = maxBoosts;
 		currBoostTime = boostDuration;

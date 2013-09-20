@@ -9,24 +9,24 @@ public class Asteroid_Info : MonoBehaviour
 	void Update() {
 		if ( hitPoints <= 0 )
 		{
-			die();
+			Die();
 		}
 	}
 
-	public void receiveDamage( float damage ) {
-		hitPoints -= damage;
+	public void receiveDamage( object[] damageMessage ) {
+		float dmgDone = (float)damageMessage[0];
+		hitPoints -= dmgDone;
 	}
 	
 	void OnCollisionEnter(Collision other) {
 		GameObject hitObject = other.gameObject;
 		
 		if ( hitObject.tag == "Player" ) {
-			hitObject.SendMessage("receiveDamage", collideDamage );
+			hitObject.SendMessage("ReceiveDamageFromCover",collideDamage);
 		}
-		
 	}
 	
-	private void die() {
+	private void Die() {
 		Destroy( gameObject );
 	}
 }

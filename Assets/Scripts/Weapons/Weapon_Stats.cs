@@ -19,7 +19,7 @@ public class Weapon_Stats : MonoBehaviour {
 	protected bool isReloading;
 	protected bool hasAmmo;
 	protected bool isSwapping;
-	protected bool altFire;
+	public bool altFire;
 
 	protected float currentAmmo;
 	protected float currentReloadRate;

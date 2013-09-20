@@ -12,35 +12,40 @@ public class PlayerMovement : MonoBehaviour {
 	public float translateBrakeDeadzone = 0.2f;
 	public float rotationBrakeDeadzone = 0.3f;
 	private PlayerBoost boostController;
+	public bool inMenu = false;
 
 	protected void Awake() {
-		Screen.lockCursor = true;
-		boostController = GetComponent<PlayerBoost>();
-	}
-
-	protected void Start() {
 		if ( !networkView.isMine ) {
 			enabled = false;
 		}
 	}
+	
+	protected void Start() {
+		Screen.lockCursor = true;
+		boostController = GetComponent<PlayerBoost>();
+	}
 
 	protected void FixedUpdate() {
-		float tX = Input.GetAxis( InputConstants.TranslateX );
-		float tY = Input.GetAxis( InputConstants.TranslateY );
-		float tZ = Input.GetAxis( InputConstants.TranslateZ );
-		float dPitch = Input.GetAxis( InputConstants.Pitch );
-		float dYaw = Input.GetAxis( InputConstants.Yaw );
-		float dRoll = Input.GetAxis( InputConstants.Roll );
+		if( ! inMenu ) {
+			float tX = Input.GetAxis( InputConstants.TranslateX );
+			float tY = Input.GetAxis( InputConstants.TranslateY );
+			float tZ = Input.GetAxis( InputConstants.TranslateZ );
+			float dPitch = Input.GetAxis( InputConstants.Pitch );
+			float dYaw = Input.GetAxis( InputConstants.Yaw );
+			float dRoll = Input.GetAxis( InputConstants.Roll );
 
-		DoRotation( dPitch, dYaw, dRoll );
+			DoRotation( dPitch, dYaw, dRoll );
 
-		if( Input.GetAxis( InputConstants.Brakes ) != 0 ) {
-			DoStop();
-		}
-		if( Input.GetAxis( InputConstants.Boost ) != 0 ) {
-			boostController.DoBoost( transform.forward );
+			if( Input.GetAxis( InputConstants.Brakes ) != 0 ) {
+				DoStop();
+			}
+			if( Input.GetAxis( InputConstants.Boost ) != 0 ) {
+				boostController.DoBoost( transform.forward );
+			} else {
+				DoTranslation( tX, tY, tZ );
+			}
 		} else {
-			DoTranslation( tX, tY, tZ );
+			DoStop();
 		}
 		networkView.RPC( "UpdatePosition", RPCMode.Others, transform.position, transform.rotation );
 	}

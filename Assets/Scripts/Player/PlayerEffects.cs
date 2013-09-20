@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 public class PlayerEffects : MonoBehaviour {
-	
+
 	public int trailIntensity = 30;
 	public float trailLifetime = 4.0f;
 	public float sparkLifetime = 1.0f;
@@ -11,7 +11,7 @@ public class PlayerEffects : MonoBehaviour {
 	private GameObject currentTrail;
 	private TrailRenderer lightTrail;
 	private ParticleSystem gunSparks;
-	
+
 	private LineRenderer grappleBeam;
 
 
@@ -46,16 +46,19 @@ public class PlayerEffects : MonoBehaviour {
 	public void StartGrapple( Vector3 grappleTarget ) {
 		grappleBeam.enabled = true;
 		grappleBeam.SetPosition( 1, grappleTarget );
+		networkView.RPC( "NetworkStartGrappleBeam", RPCMode.Others, grappleTarget );
 	}
 
 	public void EndGrapple() {
 		grappleBeam.enabled = false;
+		networkView.RPC( "NetworkEndGrappleBeam", RPCMode.Others );
 	}
 
 	public void TriggerGunSpark( Vector3 position, Vector3 normal ) {
 		GameObject newSparks = ( GameObject ) GameObject.Instantiate( gunSparks.gameObject, position, Quaternion.identity );
 		newSparks.transform.forward = normal;
 		newSparks.GetComponent<ParticleSystem>().enableEmission = true;
+		networkView.RPC( "NetworkGunSpark", RPCMode.Others, position, normal );
 		Destroy( newSparks, sparkLifetime );
 	}
 
@@ -66,5 +69,24 @@ public class PlayerEffects : MonoBehaviour {
 		currentTrail.name = "fx_light_trail_clone";
 		Destroy( currentTrail, trailLifetime * 2 );
 		lightTrail.enabled = false;
+	}
+	
+	[RPC]
+	public void NetworkGunSpark( Vector3 position, Vector3 normal ) {
+		GameObject newSparks = ( GameObject ) GameObject.Instantiate( gunSparks.gameObject, position, Quaternion.identity );
+		newSparks.transform.forward = normal;
+		newSparks.GetComponent<ParticleSystem>().enableEmission = true;
+		Destroy( newSparks, sparkLifetime );
+	}
+	
+	[RPC]
+	public void NetworkStartGrappleBeam( Vector3 grappleTarget ) {
+		grappleBeam.enabled = true;
+		grappleBeam.SetPosition( 1, grappleTarget );
+	}
+	
+	[RPC]
+	public void NetworkEndGrappleBeam() {
+		grappleBeam.enabled = false;	
 	}
 }

@@ -13,7 +13,7 @@ public class FollowCamera : MonoBehaviour {
 	}
 
 	protected void Update () {
-		transform.position = standardPos.position;
+		transform.position = standardPos.position; // 
 		transform.localRotation = standardPos.parent.rotation;
 	}
 }

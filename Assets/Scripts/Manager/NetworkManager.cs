@@ -1,6 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+public struct Player 
+{
+	public GameObject avatar;
+	public NetworkPlayer playerInfo;
+	public float playerHealth;
+	public int score;
+}
+
 public class NetworkManager : MonoBehaviour {
 
 	public GameObject playerPrefab;
@@ -8,14 +16,8 @@ public class NetworkManager : MonoBehaviour {
 	// NETWORK CONSTANTS
 	const int DEFAULT_PORT = 31337;
 	const int MAX_CONNECTIONS = 16;
-
-	private struct Player 
-	{
-		public GameObject avatar;
-		public NetworkPlayer playerInfo;
-	}
-	private List<Player> otherPlayers;
-	private Player my;
+	public List<Player> otherPlayers;
+	public Player my;
 
 	private GameManager gameManager;
 
@@ -52,6 +54,14 @@ public class NetworkManager : MonoBehaviour {
 		// Request each other player's state at the time of connection
 		networkView.RPC( "RequestIntialPlayerState", RPCMode.OthersBuffered, Network.player );
 	}
+	
+	public Player FindPlayer( NetworkPlayer player ) {
+		if( player == my.playerInfo ) { 
+			return my; 
+		} else {
+			return otherPlayers.Find( ( x => x.playerInfo == player ) );
+		}
+	}
 
 	/////////////////////////
 	//	EVENTS
@@ -77,14 +87,17 @@ public class NetworkManager : MonoBehaviour {
 	void OnPlayerDisconnected( NetworkPlayer player ) {
 		NetworkViewID id = otherPlayers.Find( ( x => x.playerInfo == player ) ).avatar.networkView.viewID;
 		Network.RemoveRPCs( player );
+		Network.DestroyPlayerObjects( player ); //added to test if this changes "lingering"
 		networkView.RPC( "RemoveObject", RPCMode.Others, id );
 	}
-
+	
 	// Called when we disconnect (client side)
 	void OnDisconnectedFromServer( NetworkDisconnection info ) {
 		if ( info == NetworkDisconnection.LostConnection ) {
 		}
 		otherPlayers.Clear();
+		Network.RemoveRPCs(networkView.viewID);
+		Network.Destroy(networkView.viewID);
 		Application.LoadLevel( Levels.Main );
 	}
 
