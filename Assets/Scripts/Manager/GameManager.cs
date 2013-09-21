@@ -12,10 +12,25 @@ public class GameManager : MonoBehaviour {
 
 	public GameObject playerPrefab;
 	private static List<Transform> spawnPoints;
-
+	private static GameManager instance = null;
+	public static GameManager Instance {
+		get { return instance; }
+	}
+	private NetworkManager networkManager;
+	
+	void Awake() {
+		if( instance != null && instance != this ) {
+			Destroy (this.gameObject);
+			return;
+		} else {
+			instance = this;
+		}
+		DontDestroyOnLoad(gameObject);
+	}
+	
 	void Start() {
-		DontDestroyOnLoad( this );
 		spawnPoints = new List<Transform>();
+		networkManager = GameObject.FindGameObjectWithTag( Tags.NetworkController ).GetComponent<NetworkManager>();
 	}
 
 	// Instantiate a player at a random spawn point
@@ -52,6 +67,7 @@ public class GameManager : MonoBehaviour {
 		
 		//Stop the player from moving
 		deadPlayer.rigidbody.velocity = Vector3.zero;
+		deadPlayer.rigidbody.angularVelocity = Vector3.zero;
 		
 		//Begin wait sequence, then respawn
 		StartCoroutine( RespawnTimer( deadPlayer ) );
@@ -67,12 +83,12 @@ public class GameManager : MonoBehaviour {
 		deadPlayer.transform.rotation = spawn.rotation;
 		
 		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
-		cameraScript.enabled = true;
-		
-		deadPlayer.SetActive(true);
-		
+		cameraScript.enabled = true;	
 		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
-		mainGUI.enabled = true;	
+		mainGUI.enabled = true;
+		
+		networkManager.networkView.RPC("ResumeRendering",RPCMode.Others, networkManager.my.playerInfo);
+		deadPlayer.SetActive(true);
 	}
 
 	public GameObject SpawnPlayer( Vector3 position, Quaternion rotation ) {

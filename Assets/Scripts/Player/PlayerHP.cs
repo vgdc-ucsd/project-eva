@@ -32,15 +32,15 @@ public class PlayerHP : MonoBehaviour {
 		
 		if( networkManager.my.playerHealth <= 0 ) {
 			Debug.Log("I suicided. Respawning...!");
-			networkView.RPC( "ReportDeath", RPCMode.All, networkManager.my.playerInfo, networkManager.my.playerInfo );
-			
-			//Return to full health after respawn
+			gameManager.KillPlayer( networkManager.my.avatar );
 			networkManager.my.playerHealth = maxHealth;
+			gameManager.RespawnPlayer( networkManager.my.avatar );
+			
+			networkManager.networkView.RPC( "ReportDeath", RPCMode.All, networkManager.my.playerInfo, networkManager.my.playerInfo );
 		}
 	}
 		
-	// RPC functions
-	//This gets called only on the player who was hit
+	// RPC functions	
 	[RPC]
 	void InflictDamage( float damage, NetworkPlayer playerInfo ) {
 		networkManager.my.playerHealth -= damage;
@@ -48,25 +48,13 @@ public class PlayerHP : MonoBehaviour {
 		
 		if (networkManager.my.playerHealth <= 0) {
 			Debug.Log("I died. Respawning...!");
-			networkView.RPC("ReportDeath",RPCMode.All, networkManager.my.playerInfo, playerInfo);
 			
-			//Return to full health after respawn
+			networkManager.networkView.RPC("StopRendering",RPCMode.Others, networkManager.my.playerInfo);
+			networkManager.networkView.RPC("ReportDeath",RPCMode.All, networkManager.my.playerInfo, playerInfo);	
+
+			gameManager.KillPlayer( networkManager.my.avatar );
 			networkManager.my.playerHealth = maxHealth;
-		}
-	}
-	
-	[RPC]
-	void ReportDeath( NetworkPlayer deadPlayer, NetworkPlayer killer ) {
-		Player dead = networkManager.FindPlayer( deadPlayer );
-		gameManager.KillPlayer( dead.avatar );
-		gameManager.RespawnPlayer( dead.avatar );
-		
-		// if killer is same as dead player (ie. suicide), then reduce dead player's score by 1
-		if (deadPlayer == killer) { 
-			dead.score--; 
-		} else { 
-			Player killerPlayer = networkManager.FindPlayer( killer );
-			killerPlayer.score++;	
+			gameManager.RespawnPlayer( networkManager.my.avatar );
 		}
 	}
 }

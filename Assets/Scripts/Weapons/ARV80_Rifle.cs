@@ -111,14 +111,13 @@ public class ARV80_Rifle : Weapon_Stats {
 				//object hit, null if none hit
 				GameObject hitObject = hitInfo.collider.gameObject;
 
-				if ( hitObject.tag == "Player" || hitObject.tag == "Enemy" ) {
+				if ( hitObject.tag == "Player" ) {
 					NetworkPlayer hitPlayer = hitInfo.collider.networkView.owner;
 					transform.parent.networkView.RPC ("InflictDamage",hitPlayer,damage,myPlayerInfo);
 				}
 
 				if ( hitObject.tag == "Cover" ) {
-					//damage cover
-					//cover.receiveDamage(damage);
+					hitObject.SendMessage("receiveDamage", damage);
 				}
 
 				//show bullet hit particles

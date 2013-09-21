@@ -20,9 +20,23 @@ public class NetworkManager : MonoBehaviour {
 	public Player my;
 
 	private GameManager gameManager;
+	private static NetworkManager instance = null;
+	
+	public static NetworkManager Instance {
+		get { return instance; }
+	}
+	
+	void Awake() {
+		if( instance != null && instance != this ) {
+			Destroy (this.gameObject);
+			return;
+		} else {
+			instance = this;
+		}
+		DontDestroyOnLoad(gameObject);
+	}
 
 	void Start() {
-		DontDestroyOnLoad( this );
 		otherPlayers = new List<Player>();
 		gameManager = GameObject.FindGameObjectWithTag( Tags.GameController ).GetComponent<GameManager>();
 	}
@@ -139,5 +153,30 @@ public class NetworkManager : MonoBehaviour {
 	void RemoveObject( NetworkViewID id ) {
 		Destroy( NetworkView.Find( id ).gameObject );
 		Debug.Log( "Object with NetworkViewId " + id.ToString() + " removed" );
+	}
+	
+	[RPC]
+	void StopRendering( NetworkPlayer deadplayer ) {
+		Player dead = FindPlayer( deadplayer );
+		dead.avatar.SetActive(false);
+	}
+	
+	[RPC]
+	void ResumeRendering( NetworkPlayer respawnedPlayer ) {
+		Player alive = FindPlayer( respawnedPlayer );
+		alive.avatar.SetActive(true);
+	}
+	
+	[RPC]
+	void ReportDeath( NetworkPlayer deadPlayer, NetworkPlayer killer ) {
+		Player dead = FindPlayer( deadPlayer );
+		
+		// if killer is same as dead player (ie. suicide), then reduce dead player's score by 1
+		if (deadPlayer == killer) { 
+			dead.score--; 
+		} else { 
+			Player killerPlayer = FindPlayer( killer );
+			killerPlayer.score++;	
+		}
 	}
 }
