@@ -83,18 +83,29 @@ public class NetworkManager : MonoBehaviour {
 
 	// Called when the server goes up
 	void OnServerInitialized() {
-		Debug.Log( "Server Intitalized" );
+		Debug.Log( "Server Initialized" );
+		
+		Network.SetSendingEnabled(0,false);
+		Network.isMessageQueueRunning = false;
+		Network.SetLevelPrefix ( 2 );
 		Application.LoadLevel( 2 );
+		Network.isMessageQueueRunning = true;
+		Network.SetSendingEnabled(0,true);
 	}
 
 	// Caled when a player connects (server side)
-	void PlayerConnected( NetworkPlayer playerInfo ) {
+	void OnPlayerConnected( NetworkPlayer playerInfo ) {
 		
 	}
 
 	// Called when the player connects (client side)
-	void OnConnectedToServer() {
+	void OnConnectedToServer() {	
+		Network.SetSendingEnabled(0,false);
+		Network.isMessageQueueRunning = false;
+		Network.SetLevelPrefix( 2 );
 		Application.LoadLevel( 2 );
+		Network.isMessageQueueRunning = true;
+		Network.SetSendingEnabled(0,true);
 	}
 
 	// Called when a player disconnects (server side)
@@ -117,7 +128,7 @@ public class NetworkManager : MonoBehaviour {
 
 	void OnLevelWasLoaded( int levelID ) {
 		if ( gameManager.IsGameplayLevel( levelID ) ) {
-			gameManager.CollectCurrentLevelSpawns();
+			gameManager.CreateLevelObjects();
 			EnterGame();
 		}
 	}

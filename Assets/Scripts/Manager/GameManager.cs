@@ -11,6 +11,9 @@ public class GameManager : MonoBehaviour {
 	public float respawnTime = 3.0f;
 
 	public GameObject playerPrefab;
+	public GameObject healthPickupPrefab;
+	public GameObject coverAsteroidPrefab;
+	
 	private static List<Transform> spawnPoints;
 	private static GameManager instance = null;
 	public static GameManager Instance {
@@ -124,10 +127,45 @@ public class GameManager : MonoBehaviour {
 		}
 		return spawnPoints;
 	}
+	
+	public List<Transform> CollectCurrentHealthLocations() {
+		List<Transform> healthPickupPoints = new List<Transform>();
+		GameObject[] hpPickupObjects = GameObject.FindGameObjectsWithTag( "HealthPickup" );
+			
+		foreach ( GameObject loc in hpPickupObjects ) {
+			healthPickupPoints.Add( loc.transform );
+			Debug.Log( "HP pickup added" );
+		}
+		return healthPickupPoints;
+	}
+	
+	public List<Transform> CollectCurrentCoverLocations() {
+		List<Transform> coverSpawnPoints = new List<Transform>();
+		GameObject[] coverObjects = GameObject.FindGameObjectsWithTag( "Cover" );
+			
+		foreach ( GameObject loc in coverObjects ) {
+			coverSpawnPoints.Add( loc.transform );
+			Debug.Log( "Cover added" );
+		}
+		return coverSpawnPoints;
+	}	
 
 	void OnLevelWasLoaded( int levelID ) {
 		if ( IsGameplayLevel( levelID ) ) {
 			spawnPoints = CollectCurrentLevelSpawns();
 		}
+	}
+	
+	public void CreateLevelObjects() {
+		List<Transform> healthPickupPoints = CollectCurrentHealthLocations();
+		List<Transform> coverSpawnPoints = CollectCurrentCoverLocations();
+		
+		foreach( Transform pickup in healthPickupPoints ) {
+			Instantiate(healthPickupPrefab, pickup.position, pickup.rotation);
+		}
+	
+		foreach( Transform cover in coverSpawnPoints ) {
+			Instantiate(coverAsteroidPrefab, cover.position, cover.rotation);
+		}	
 	}
 }

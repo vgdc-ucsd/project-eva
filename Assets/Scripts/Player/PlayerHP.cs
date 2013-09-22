@@ -20,27 +20,20 @@ public class PlayerHP : MonoBehaviour {
 	public float GetMaxHP() {
 		return maxHealth;
 	}
-	
-	public void SetCurrentHP( float newArmor ) {
-		networkManager.my.playerHealth = newArmor;
-	}
-	
-	public void ReceiveDamageFromCover( float damage ) {
-		Debug.Log("I'm taking " + damage + " damage");
-		networkManager.my.playerHealth -= damage;	
-		Debug.Log("Hit by cover! My health is " + networkManager.my.playerHealth );
 		
-		if( networkManager.my.playerHealth <= 0 ) {
-			Debug.Log("I suicided. Respawning...!");
-			gameManager.KillPlayer( networkManager.my.avatar );
-			networkManager.my.playerHealth = maxHealth;
-			gameManager.RespawnPlayer( networkManager.my.avatar );
-			
-			networkManager.networkView.RPC( "ReportDeath", RPCMode.All, networkManager.my.playerInfo, networkManager.my.playerInfo );
+	// RPC functions
+	[RPC]
+	void IncreaseHPfromPickup( float plusHealth ) {
+		float curHP = GetCurrentHP();
+		if ( curHP < maxHealth ) {
+			if ( curHP + plusHealth >= maxHealth ) {
+				networkManager.my.playerHealth = maxHealth;
+			} else {
+				networkManager.my.playerHealth = curHP + plusHealth;				
+			}
 		}
 	}
-		
-	// RPC functions	
+	
 	[RPC]
 	void InflictDamage( float damage, NetworkPlayer playerInfo ) {
 		networkManager.my.playerHealth -= damage;
@@ -56,5 +49,21 @@ public class PlayerHP : MonoBehaviour {
 			networkManager.my.playerHealth = maxHealth;
 			gameManager.RespawnPlayer( networkManager.my.avatar );
 		}
+	}
+	
+	[RPC]
+	void InflictDamageFromCover( float damage ) {
+		Debug.Log("I'm taking " + damage + " damage");
+		networkManager.my.playerHealth -= damage;	
+		Debug.Log("Hit by cover! My health is " + networkManager.my.playerHealth );
+		
+		if( networkManager.my.playerHealth <= 0 ) {
+			Debug.Log("I suicided. Respawning...!");
+			gameManager.KillPlayer( networkManager.my.avatar );
+			networkManager.my.playerHealth = maxHealth;
+			gameManager.RespawnPlayer( networkManager.my.avatar );
+			
+			networkManager.networkView.RPC( "ReportDeath", RPCMode.All, networkManager.my.playerInfo, networkManager.my.playerInfo );
+		}		
 	}
 }
