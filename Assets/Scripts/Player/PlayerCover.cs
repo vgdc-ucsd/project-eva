@@ -18,6 +18,12 @@ public class PlayerCover : MonoBehaviour {
 	private float radius;
 	private float posDiff;
 	private Plane tangentPlane;
+	
+	protected void Awake() {
+		if( ! networkView.isMine ) {
+			enabled = false;
+		}
+	}	
 
 	// Use this for initialization
 	void Start() {

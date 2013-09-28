@@ -22,6 +22,7 @@ Thumbs.db
 *.suo
 *.pidb
 *.userprefs
+*.csproj.user
 
 *.[Pp][Nn][Gg]
 *.[Tt][Gg][Aa]

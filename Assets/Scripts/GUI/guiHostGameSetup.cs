@@ -26,7 +26,8 @@ public class guiHostGameSetup : MonoBehaviour {
 			}
 		} else {
 			if( GUI.Button(new Rect(Screen.width-1000,Screen.height-80,400,50),"Launch",hostReadyStyle) ){
-				Application.LoadLevel(2);
+				
+				NetworkManager.StartServer();
 			}
 		}
 		

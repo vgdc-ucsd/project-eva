@@ -27,7 +27,6 @@ public class S107_SniperRifle : Weapon_Stats {
 		regCamView = 60.0f;
 		zoomMultiplier = 0.14285f;
 
-		//Weapon_Stats.cs
 		WeaponAwake();
 
 		shotFired = false;
@@ -45,7 +44,7 @@ public class S107_SniperRifle : Weapon_Stats {
 		IsReloadingCheck();
 
 		//changing burstfire
-		if ( Input.GetButtonDown( InputConstants.AltFire ) ) {
+		if ( Input.GetButtonDown( InputConstants.AltFire ) ){
 			altFire = ZoomToggle();
 		}
 
@@ -63,12 +62,11 @@ public class S107_SniperRifle : Weapon_Stats {
 		if ( shotFired ) {
 			isOnCoolDown = true;
 		}
-
 	}
 
 	//handles burst fire toggle on off
 	public bool ZoomToggle() {
-		if ( !altFire) {
+		if ( !altFire ) {
 			Camera.main.fieldOfView = Camera.main.fieldOfView * zoomMultiplier;
 			return true;
 		} else {
@@ -80,9 +78,6 @@ public class S107_SniperRifle : Weapon_Stats {
 
 	//handles shooting
 	private void Fire() {
-		//play shooting sound
-		//emit muzzle flare
-		//emit bullet tracer image?
 
 		if ( Input.GetButtonDown( InputConstants.Fire ) ) {
 			//randomgenerate coordinates to imitate bullet spread, default circle radius is 1.0f
@@ -97,17 +92,12 @@ public class S107_SniperRifle : Weapon_Stats {
 			//creating the bullet, origin is camera
 			Ray ray = new Ray( Camera.main.transform.position, rayDirection );
 
-
 			//returns true if hits collider, false if nothing hit
 			if ( Physics.Raycast( ray, out hitInfo, range ) ) {
-				//coordinates of hit
 				Vector3 hitPoint = hitInfo.point;
-				//Debug.Log("Hit Point: " + hitPoint);
 
 				//object hit, null if none hit
 				GameObject hitObject = hitInfo.collider.gameObject;
-				//Debug.Log("Hit Object: " + hitObject);
-
 				if ( hitObject.tag == "Enemy" ) {
 					//damage enemy
 					//enemy.receiveDamage(damage);
@@ -120,7 +110,6 @@ public class S107_SniperRifle : Weapon_Stats {
 
 				//show bullet hit particles
 				effectsController.TriggerGunSpark( hitPoint, hitInfo.normal );
-				//Debug.DrawLine( player.transform.position , hitPoint );
 			}
 
 			currentAmmo--;

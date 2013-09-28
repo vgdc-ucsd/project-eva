@@ -13,6 +13,7 @@ public class guiGame : MonoBehaviour {
 	private PlayerBoost boostController;
 	private PlayerWeapons weaponController;
 	private PlayerHP healthController;
+	private PlayerMovement movementController;
 	private float currentHealth;
 	private float maxHealth;
 	private float currentAmmo;
@@ -27,9 +28,15 @@ public class guiGame : MonoBehaviour {
 	float fadeInTime = 6.0f;
 
 	protected void Awake() {
+		
+		if( !networkView.isMine ) {
+			enabled = false;
+		}
+		
 		boostController = GetComponent<PlayerBoost>();
 		weaponController = GetComponent<PlayerWeapons>();
 		healthController = GetComponent<PlayerHP>();
+		movementController = GetComponent<PlayerMovement>();
 		maxHealth = healthController.GetMaxHP();
 	}
 	
@@ -72,9 +79,11 @@ public class guiGame : MonoBehaviour {
 			if( isMenuOpen ) { 
 				isMenuOpen = false;
 				Screen.lockCursor = true;
+				movementController.inMenu = false;
 			} else { 
 				isMenuOpen = true; 
 				Screen.lockCursor = false;
+				movementController.inMenu = true;
 			}
 		}
 	}
@@ -105,7 +114,7 @@ public class guiGame : MonoBehaviour {
 			GUI.DrawTexture(new Rect(Screen.width-375,25,350,100),gameMenuBG,ScaleMode.StretchToFill);
 			
 			if( GUI.Button(new Rect(Screen.width-350,40,300,40),"Exit to Main Menu",GameMenuStyle) ) {
-				Application.LoadLevel(0);
+				NetworkManager.DisconnectFromServer();
 			}
 		}
 	}

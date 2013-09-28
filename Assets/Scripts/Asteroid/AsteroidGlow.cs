@@ -7,7 +7,6 @@ public class AsteroidGlow : MonoBehaviour {
 	private Shader outlineShader;
 	private Shader defaultShader;
 	
-	// Use this for initialization
 	void Start () {
 		ParentAsteroid = transform.parent.gameObject;
 		outlineShader = Shader.Find( "Outlined/Silhouetted Diffuse" );
@@ -15,13 +14,13 @@ public class AsteroidGlow : MonoBehaviour {
 	}
 	
 	void OnTriggerEnter(Collider other) {
-		if( other.tag == "Player" ) {
+		if( other.tag == "Player" && other.networkView.isMine ) {
 			ParentAsteroid.renderer.material.shader = outlineShader;
 		}
 	}
 	
 	void OnTriggerExit(Collider other) {
-		if( other.tag == "Player" ) {
+		if( other.tag == "Player" && other.networkView.isMine ) {
 			ParentAsteroid.renderer.material.shader = defaultShader;
 		}
 	}

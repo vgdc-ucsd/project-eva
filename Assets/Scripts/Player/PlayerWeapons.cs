@@ -17,8 +17,8 @@ public class PlayerWeapons : MonoBehaviour {
 	private ARV80_Rifle assaultRifleScript;
 	private S107_SniperRifle sniperRifleScript;
 	private Weapon_Stats currentWeaponScript;
-	
-	protected void Awake() {
+		
+	protected void Start() {
 		weaponSlots = new Weapon_Stats[totalWeapons];
 		assaultRifleScript = AssaultRifle.GetComponent<ARV80_Rifle>();
 		sniperRifleScript = SniperRifle.GetComponent<S107_SniperRifle>();
@@ -61,7 +61,7 @@ public class PlayerWeapons : MonoBehaviour {
 		
 		if ( nextWeapon != currentWeapon ) {
 			
-			if( currentWeapon == 2 ) {
+			if( currentWeapon == 2 && sniperRifleScript.altFire ) {
 				sniperRifleScript.ZoomToggle();		
 			}
 			currentWeapon = nextWeapon;
@@ -155,16 +155,19 @@ public class PlayerWeapons : MonoBehaviour {
 	
 	public void SetCurrentWeapon( string weapon ) {
 		
-		if( weapon == "AssaultRifle" ) {
-			currentWeapon = 0;
-			currentWeaponScript.enabled = false;
-			currentWeaponScript = weaponSlots[currentWeapon];
-			currentWeaponScript.enabled = true;
-		} else if( weapon == "SniperRifle" ) {
-			currentWeapon = 2;
-			currentWeaponScript.enabled = false;
-			currentWeaponScript = weaponSlots[currentWeapon];
-			currentWeaponScript.enabled = true;
+		switch (weapon) {
+			case "AssaultRifle":
+				currentWeapon = 0;
+				currentWeaponScript.enabled = false;
+				currentWeaponScript = weaponSlots[currentWeapon];
+				currentWeaponScript.enabled = true;
+				return;
+			case "SniperRifle":
+				currentWeapon = 2;
+				currentWeaponScript.enabled = false;
+				currentWeaponScript = weaponSlots[currentWeapon];
+				currentWeaponScript.enabled = true;
+				return;
 		}
 	}		
 }

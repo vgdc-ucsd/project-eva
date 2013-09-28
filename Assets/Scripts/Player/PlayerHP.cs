@@ -3,38 +3,67 @@ using System.Collections;
 
 public class PlayerHP : MonoBehaviour {
 	
-	public float playerHealth;
 	public float maxHealth = 100.0f;
+	private GameManager gameManager;
+	private NetworkManager networkManager;
+	
+	void Start() {
+		gameManager = GameObject.FindGameObjectWithTag( Tags.GameController ).GetComponent<GameManager>();
+		networkManager = GameObject.FindGameObjectWithTag( Tags.NetworkController ).GetComponent<NetworkManager>();
+		networkManager.my.playerHealth = maxHealth;
+	}
 	
 	public float GetCurrentHP() {
-		return playerHealth;
+		return networkManager.my.playerHealth;
 	}
 	
 	public float GetMaxHP() {
 		return maxHealth;
 	}
-	
-	public void SetCurrentHP( float newArmor ) {
-		playerHealth = newArmor;
-	}
-	
-	void Start() {
-		playerHealth = maxHealth;
-	}
-	
-	void Update() {
-		if ( playerHealth <= 0 ) {
-			Die();
+		
+	// RPC functions
+	[RPC]
+	void IncreaseHPfromPickup( float plusHealth ) {
+		float curHP = GetCurrentHP();
+		if ( curHP < maxHealth ) {
+			if ( curHP + plusHealth >= maxHealth ) {
+				networkManager.my.playerHealth = maxHealth;
+			} else {
+				networkManager.my.playerHealth = curHP + plusHealth;				
+			}
 		}
 	}
+	
+	[RPC]
+	void InflictDamage( float damage, NetworkPlayer playerInfo ) {
+		networkManager.my.playerHealth -= damage;
+		Debug.Log("I got shot! My health is " + networkManager.my.playerHealth);
+		
+		if (networkManager.my.playerHealth <= 0) {
+			Debug.Log("I died. Respawning...!");
+			
+			networkManager.networkView.RPC("StopRendering",RPCMode.Others, networkManager.my.playerInfo);
+			networkManager.networkView.RPC("ReportDeath",RPCMode.All, networkManager.my.playerInfo, playerInfo);	
 
-	public void receiveDamage( float damage ) {
-		playerHealth -= damage;
+			gameManager.KillPlayer( networkManager.my.avatar );
+			networkManager.my.playerHealth = maxHealth;
+			gameManager.RespawnPlayer( networkManager.my.avatar );
+		}
 	}
-
-	private void Die(){
-		Debug.Log ("OH SHIT. You died.");
-		Screen.lockCursor = false;
-		Application.LoadLevel(0);
+	
+	[RPC]
+	void InflictDamageFromCover( float damage ) {
+		Debug.Log("I'm taking " + damage + " damage");
+		networkManager.my.playerHealth -= damage;	
+		Debug.Log("Hit by cover! My health is " + networkManager.my.playerHealth );
+		
+		if( networkManager.my.playerHealth <= 0 ) {
+			Debug.Log("I suicided. Respawning...!");
+			gameManager.KillPlayer( networkManager.my.avatar );
+			networkManager.my.playerHealth = maxHealth;
+			gameManager.RespawnPlayer( networkManager.my.avatar );
+			
+			networkManager.networkView.RPC( "ReportDeath", RPCMode.All, networkManager.my.playerInfo, networkManager.my.playerInfo );
+		}		
 	}
 }
