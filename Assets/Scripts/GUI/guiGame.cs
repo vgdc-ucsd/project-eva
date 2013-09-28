@@ -10,6 +10,7 @@ public class guiGame : MonoBehaviour {
 	public GUIStyle HUDStyle_small;
 	public GUIStyle HPCountStyle;
 	public GUIStyle GameMenuStyle;
+	public string id;
 	private PlayerBoost boostController;
 	private PlayerWeapons weaponController;
 	private PlayerHP healthController;
@@ -19,13 +20,14 @@ public class guiGame : MonoBehaviour {
 	private float currentAmmo;
 	private	float spareAmmo;
 	private float currWidth;
-	private string id;
 	private GameObject MenuMusic;
 	private GameObject BattleMusic;
 	private bool isMenuOpen = false;
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
 	float fadeInTime = 6.0f;
+	float crosshair_xMin;
+	float crosshair_yMin;
 
 	protected void Awake() {
 		
@@ -57,6 +59,9 @@ public class guiGame : MonoBehaviour {
 		} else {
 			id = PlayerOptions.playerID;	
 		}
+		
+		crosshair_xMin = Screen.width/2 - ( crosshairImage.width/2 );
+		crosshair_yMin = Screen.height/2 - ( crosshairImage.height/2 );
 	}
 		
 	IEnumerator FadeAudio (GameObject obj, float timer, Fade fadeType) {
@@ -89,9 +94,6 @@ public class guiGame : MonoBehaviour {
 	}
 	
 	void OnGUI() {		
-		float crosshair_xMin = Screen.width/2 - ( crosshairImage.width/2 );
-		float crosshair_yMin = Screen.height/2 - ( crosshairImage.height/2 );
-
 		currentAmmo = weaponController.GetWeaponCurrentAmmo();
 		spareAmmo = weaponController.GetWeaponSpareAmmo();
 		currentHealth = healthController.GetCurrentHP();

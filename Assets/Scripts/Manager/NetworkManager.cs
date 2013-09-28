@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public struct Player 
-{
+public struct Player {
 	public GameObject avatar;
 	public NetworkPlayer playerInfo;
 	public float playerHealth;
+	public string name;
 	public int score;
 }
 
@@ -18,7 +18,8 @@ public class NetworkManager : MonoBehaviour {
 	const int MAX_CONNECTIONS = 16;
 	public List<Player> otherPlayers;
 	public Player my;
-
+	
+	private guiGame mainGUI;
 	private GameManager gameManager;
 	private static NetworkManager instance = null;
 	
@@ -60,7 +61,9 @@ public class NetworkManager : MonoBehaviour {
 		my.avatar = myAvatar;
 		my.playerInfo = Network.player;
 
-		gameManager.AssignCamera( myAvatar );
+		gameManager.AssignCamera( myAvatar );	
+		mainGUI = myAvatar.GetComponent<guiGame>();
+		my.name = mainGUI.id;
 
 		// Tell other players we've connected
 		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, myAvatar.networkView.viewID, myAvatar.transform.position, myAvatar.transform.rotation );
@@ -84,7 +87,6 @@ public class NetworkManager : MonoBehaviour {
 	// Called when the server goes up
 	void OnServerInitialized() {
 		Debug.Log( "Server Initialized" );
-		
 		Network.SetSendingEnabled(0,false);
 		Network.isMessageQueueRunning = false;
 		Network.SetLevelPrefix ( 2 );
@@ -93,7 +95,7 @@ public class NetworkManager : MonoBehaviour {
 		Network.SetSendingEnabled(0,true);
 	}
 
-	// Caled when a player connects (server side)
+	// Called when a player connects (server side)
 	void OnPlayerConnected( NetworkPlayer playerInfo ) {
 		
 	}

@@ -34,7 +34,6 @@ public class ARV80_Rifle : Weapon_Stats {
 		bulletSpread = 0.01f;
 		bulletCircleRadius = 1.0f;
 		
-		
 		WeaponAwake();
 	}
 
