@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public struct Player {
+public class Player {
 	public GameObject avatar;
 	public NetworkPlayer playerInfo;
 	public float playerHealth;
@@ -78,7 +78,7 @@ public class NetworkManager : MonoBehaviour {
 		} else {
 			return otherPlayers.Find( ( x => x.playerInfo == player ) );
 		}
-	}
+	} 
 	
 	public Player FindPlayerByViewID( NetworkViewID viewID ) {
 		if ( viewID == my.avatar.networkView.viewID ) {
@@ -86,6 +86,10 @@ public class NetworkManager : MonoBehaviour {
 		} else {
 			return otherPlayers.Find ( (x => x.avatar.networkView.viewID == viewID ) );	
 		}
+	}
+	
+	public int FindPlayerIndex( NetworkViewID viewID ) { // cannot find yourself
+		return otherPlayers.FindIndex( (x => x.avatar.networkView.viewID == viewID ) );
 	}
 
 	/////////////////////////
@@ -198,25 +202,15 @@ public class NetworkManager : MonoBehaviour {
 	void ReportDeath( NetworkViewID deadPlayerID, NetworkViewID killerID ) {
 		Player deadPlayer = FindPlayerByViewID( deadPlayerID );
 		Player killerPlayer = FindPlayerByViewID( killerID );
-		
+				
 		// if killer is same as dead player (ie. suicide), then reduce dead player's score by 1
 		if (deadPlayerID == killerID) { 
 			deadPlayer.score--;
+		} else { // increase killer's score by one
 			
-			if (killerID == my.avatar.networkView.viewID) { // if killer is "my", update my
-				my.score--;	
-			}
-			
-		} else { 
-			killerPlayer.score++; 	
-			
-			if (killerID == my.avatar.networkView.viewID) { // if killer is "my", update my
-				my.score++;	
-			}
-			
+			killerPlayer.score++;
 			if( killerPlayer.score >= killsToWin ) {
-				Debug.Log(killerPlayer.name + " wins!");
-				Application.Quit();
+				Debug.Log(killerPlayer.name + " won!");
 			}
 		}
 	}
