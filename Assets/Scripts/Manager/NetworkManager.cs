@@ -18,7 +18,7 @@ public class NetworkManager : MonoBehaviour {
 	const int MAX_CONNECTIONS = 16;
 	public List<Player> otherPlayers;
 	public Player my;
-	
+	private int killsToWin;
 	private guiGame mainGUI;
 	private GameManager gameManager;
 	private static NetworkManager instance = null;
@@ -91,13 +91,17 @@ public class NetworkManager : MonoBehaviour {
 		Network.isMessageQueueRunning = false;
 		Network.SetLevelPrefix ( 2 );
 		Application.LoadLevel( 2 );
+		
+		killsToWin = PlayerOptions.host_killsToWin;
+		
 		Network.isMessageQueueRunning = true;
 		Network.SetSendingEnabled(0,true);
 	}
 
 	// Called when a player connects (server side)
 	void OnPlayerConnected( NetworkPlayer playerInfo ) {
-		
+		//Tell the new player the kill limit
+		networkView.RPC("SpecifyKillLimit", playerInfo, killsToWin);
 	}
 
 	// Called when the player connects (client side)
@@ -115,7 +119,7 @@ public class NetworkManager : MonoBehaviour {
 		NetworkViewID id = otherPlayers.Find( ( x => x.playerInfo == player ) ).avatar.networkView.viewID;
 		Network.RemoveRPCs( player );
 		Network.DestroyPlayerObjects( player ); //added to test if this changes "lingering"
-		networkView.RPC( "RemoveObject", RPCMode.Others, id );
+		networkView.RPC("RemoveObject", RPCMode.Others, id );
 	}
 	
 	// Called when we disconnect (client side)
@@ -190,6 +194,15 @@ public class NetworkManager : MonoBehaviour {
 		} else { 
 			Player killerPlayer = FindPlayer( killer );
 			killerPlayer.score++;	
+			
+			if( killerPlayer.score >= killsToWin ) {
+				Debug.Log(killerPlayer.name + " wins!");
+			}
 		}
+	}
+	
+	[RPC]
+	void SpecifyKillLimit( int limit ) {
+		killsToWin = limit;
 	}
 }

@@ -30,9 +30,14 @@ public class guiGame : MonoBehaviour {
 	float crosshair_yMin;
 
 	protected void Awake() {
-		
 		if( !networkView.isMine ) {
 			enabled = false;
+		}
+		
+		if( string.IsNullOrEmpty(PlayerOptions.playerID) ) {
+			id = "Jane Doe";	
+		} else {
+			id = PlayerOptions.playerID;	
 		}
 		
 		boostController = GetComponent<PlayerBoost>();
@@ -53,13 +58,7 @@ public class guiGame : MonoBehaviour {
 		if( !BattleMusic.Equals(null) ) {
 			StartCoroutine(FadeAudio( BattleMusic, fadeInTime, Fade.In));	
 		}
-		
-		if( string.IsNullOrEmpty(PlayerOptions.playerID) ) {
-			id = "Jane Doe";	
-		} else {
-			id = PlayerOptions.playerID;	
-		}
-		
+				
 		crosshair_xMin = Screen.width/2 - ( crosshairImage.width/2 );
 		crosshair_yMin = Screen.height/2 - ( crosshairImage.height/2 );
 	}
