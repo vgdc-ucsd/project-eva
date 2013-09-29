@@ -66,7 +66,7 @@ public class NetworkManager : MonoBehaviour {
 		my.name = mainGUI.id;
 
 		// Tell other players we've connected
-		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, myAvatar.networkView.viewID, myAvatar.transform.position, myAvatar.transform.rotation );
+		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, my.name, myAvatar.networkView.viewID, myAvatar.transform.position, myAvatar.transform.rotation );
 
 		// Request each other player's state at the time of connection
 		networkView.RPC( "RequestIntialPlayerState", RPCMode.OthersBuffered, Network.player );
@@ -77,6 +77,14 @@ public class NetworkManager : MonoBehaviour {
 			return my; 
 		} else {
 			return otherPlayers.Find( ( x => x.playerInfo == player ) );
+		}
+	}
+	
+	public Player FindPlayerByViewID( NetworkViewID viewID ) {
+		if ( viewID == my.avatar.networkView.viewID ) {
+			return my;	
+		} else {
+			return otherPlayers.Find ( (x => x.avatar.networkView.viewID == viewID ) );	
 		}
 	}
 
@@ -144,22 +152,24 @@ public class NetworkManager : MonoBehaviour {
 	/////////////////////////
 	[RPC]
 	void RequestIntialPlayerState( NetworkPlayer requester ) {
-		networkView.RPC( "GetCurrentPlayerState", requester, my.playerInfo, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
+		networkView.RPC( "GetCurrentPlayerState", requester, my.playerInfo, my.name, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
 	}
 
 	[RPC]
-	void GetNewPlayerState( NetworkPlayer playerInfo, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
+	void GetNewPlayerState( NetworkPlayer playerInfo, string playerName, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
 		Player newPlayer = new Player();
 		newPlayer.playerInfo = playerInfo;
+		newPlayer.name = playerName;
 		GameObject playerAvatar = NetworkView.Find( avatarID ).gameObject;
 		newPlayer.avatar = playerAvatar;
 		otherPlayers.Add( newPlayer );
 	}
 
 	[RPC]
-	void GetCurrentPlayerState( NetworkPlayer playerInfo, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
+	void GetCurrentPlayerState( NetworkPlayer playerInfo, string playerName, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
 		Player newPlayer = new Player();
 		newPlayer.playerInfo = playerInfo;
+		newPlayer.name = playerName;
 		GameObject playerAvatar = gameManager.SpawnPlayer( initialPosition, initialRotation );
 		playerAvatar.networkView.viewID = avatarID;
 		newPlayer.avatar = playerAvatar;
@@ -185,14 +195,14 @@ public class NetworkManager : MonoBehaviour {
 	}
 	
 	[RPC]
-	void ReportDeath( NetworkPlayer deadPlayer, NetworkPlayer killer ) {
-		Player dead = FindPlayer( deadPlayer );
+	void ReportDeath( NetworkViewID deadPlayerID, NetworkViewID killerID ) {
+		Player deadPlayer = FindPlayerByViewID( deadPlayerID );
+		Player killerPlayer = FindPlayerByViewID( killerID );
 		
 		// if killer is same as dead player (ie. suicide), then reduce dead player's score by 1
-		if (deadPlayer == killer) { 
-			dead.score--; 
+		if (deadPlayerID == killerID) { 
+			deadPlayer.score--; 
 		} else { 
-			Player killerPlayer = FindPlayer( killer );
 			killerPlayer.score++;	
 			
 			if( killerPlayer.score >= killsToWin ) {

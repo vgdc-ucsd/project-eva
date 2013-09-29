@@ -35,15 +35,16 @@ public class PlayerHP : MonoBehaviour {
 	}
 	
 	[RPC]
-	void InflictDamage( float damage, NetworkPlayer playerInfo ) {
+	void InflictDamage( float damage, NetworkViewID attackerID ) {
 		networkManager.my.playerHealth -= damage;
-		Debug.Log("I got shot! My health is " + networkManager.my.playerHealth);
+		Player attackerPlayer = networkManager.FindPlayerByViewID( attackerID );
+		Debug.Log("Shot by " + attackerPlayer.name);
 		
 		if (networkManager.my.playerHealth <= 0) {
 			Debug.Log("I died. Respawning...!");
 			
-			networkManager.networkView.RPC("StopRendering",RPCMode.Others, networkManager.my.playerInfo);
-			networkManager.networkView.RPC("ReportDeath",RPCMode.All, networkManager.my.playerInfo, playerInfo);	
+			networkManager.networkView.RPC("StopRendering", RPCMode.Others, networkManager.my.playerInfo);
+			networkManager.networkView.RPC("ReportDeath", RPCMode.All, networkManager.my.avatar.networkView.viewID, attackerID);	
 
 			gameManager.KillPlayer( networkManager.my.avatar );
 			networkManager.my.playerHealth = maxHealth;
