@@ -201,12 +201,22 @@ public class NetworkManager : MonoBehaviour {
 		
 		// if killer is same as dead player (ie. suicide), then reduce dead player's score by 1
 		if (deadPlayerID == killerID) { 
-			deadPlayer.score--; 
+			deadPlayer.score--;
+			
+			if (killerID == my.avatar.networkView.viewID) { // if killer is "my", update my
+				my.score--;	
+			}
+			
 		} else { 
-			killerPlayer.score++;	
+			killerPlayer.score++; 	
+			
+			if (killerID == my.avatar.networkView.viewID) { // if killer is "my", update my
+				my.score++;	
+			}
 			
 			if( killerPlayer.score >= killsToWin ) {
 				Debug.Log(killerPlayer.name + " wins!");
+				Application.Quit();
 			}
 		}
 	}

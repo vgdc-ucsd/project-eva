@@ -12,7 +12,6 @@ public class ARV80_Rifle : Weapon_Stats {
 
 	private PlayerEffects effectsController;
 	private NetworkManager networkManager;
-	private NetworkPlayer myPlayerInfo;
 	private NetworkViewID myViewID;
 	
 	void Awake () {
@@ -38,7 +37,6 @@ public class ARV80_Rifle : Weapon_Stats {
 	}
 
 	void Start() {
-		myPlayerInfo = networkManager.my.playerInfo;
 		myViewID = networkManager.my.avatar.networkView.viewID;
 		
 		currentBurstFireCoolDown = burstFireCoolDown;
@@ -115,7 +113,7 @@ public class ARV80_Rifle : Weapon_Stats {
 
 				if ( hitObject.tag == "Player" ) {
 					NetworkPlayer hitPlayer = hitInfo.collider.networkView.owner;
-					transform.parent.networkView.RPC ("InflictDamage",hitPlayer,damage,myViewID);
+					transform.parent.networkView.RPC ("InflictDamage", hitPlayer, damage, myViewID);
 				}
 
 				if ( hitObject.tag == "Cover" ) {

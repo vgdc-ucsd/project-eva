@@ -7,7 +7,7 @@ public class S107_SniperRifle : Weapon_Stats {
 
 	private PlayerEffects effectsController;
 	private NetworkManager networkManager;
-	private NetworkPlayer myPlayerInfo;
+	private NetworkViewID myViewID;
 	private bool isOnCoolDown;
 	private bool shotFired;
 
@@ -15,7 +15,6 @@ public class S107_SniperRifle : Weapon_Stats {
 		player = transform.parent.gameObject;
 		effectsController = transform.parent.GetComponent<PlayerEffects>();
 		networkManager = GameObject.FindGameObjectWithTag( Tags.NetworkController ).GetComponent<NetworkManager>();
-		myPlayerInfo = networkManager.my.playerInfo;
 
 		swapRate = 1.0f;
 		reloadRate = 4.0f;
@@ -36,6 +35,8 @@ public class S107_SniperRifle : Weapon_Stats {
 	}
 
 	void Start() {
+		myViewID = networkManager.my.avatar.networkView.viewID;
+		
 		Camera.main.fieldOfView = regCamView;
 		WeaponStart();
 	}
@@ -104,7 +105,7 @@ public class S107_SniperRifle : Weapon_Stats {
 				
 				if ( hitObject.tag == "Player" ) {
 					NetworkPlayer hitPlayer = hitInfo.collider.networkView.owner;
-					transform.parent.networkView.RPC ("InflictDamage",hitPlayer,damage,myPlayerInfo);
+					transform.parent.networkView.RPC ("InflictDamage", hitPlayer, damage, myViewID);
 				}
 
 				if ( hitObject.tag == "Cover" ) {

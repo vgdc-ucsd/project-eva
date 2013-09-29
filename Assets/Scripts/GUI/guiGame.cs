@@ -19,9 +19,12 @@ public class guiGame : MonoBehaviour {
 	private float maxHealth;
 	private float currentAmmo;
 	private	float spareAmmo;
+	
 	private float currWidth;
 	private GameObject MenuMusic;
 	private GameObject BattleMusic;
+	private NetworkManager networkManager;
+	
 	private bool isMenuOpen = false;
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
@@ -50,6 +53,7 @@ public class guiGame : MonoBehaviour {
 	void Start() {
 		MenuMusic = GameObject.FindGameObjectWithTag("MenuMusic");
 		BattleMusic = GameObject.FindGameObjectWithTag("BattleMusic");
+		networkManager = GameObject.FindGameObjectWithTag( Tags.NetworkController ).GetComponent<NetworkManager>();
 		
 		if( !MenuMusic.Equals(null) ) {
 			StartCoroutine(FadeAudio( MenuMusic, fadeOutTime, Fade.Out));
@@ -101,6 +105,7 @@ public class guiGame : MonoBehaviour {
 		GUI.Label(new Rect(Screen.width-200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
 		GUI.Label(new Rect(Screen.width-200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
 		GUI.Label(new Rect(10,20,100,20),id,HUDStyle_small);
+		GUI.Label(new Rect(10,40,100,20),"Score: " + networkManager.my.score,HUDStyle_small);
 		
 		currWidth = 300 * (currentHealth / maxHealth);
 		
