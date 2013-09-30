@@ -1,11 +1,14 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class guiGame : MonoBehaviour {
 
 	public Texture2D crosshairImage;
 	public Texture2D healthBar;
 	public Texture2D gameMenuBG;
+	public Texture2D scoreboardBG;
 	public GUIStyle HUDStyle_large;
 	public GUIStyle HUDStyle_small;
 	public GUIStyle HPCountStyle;
@@ -24,8 +27,11 @@ public class guiGame : MonoBehaviour {
 	private GameObject MenuMusic;
 	private GameObject BattleMusic;
 	private NetworkManager networkManager;
+	private List<Player> allPlayers;
 	
 	private bool isMenuOpen = false;
+	private bool isScoreboardOpen = false;
+	
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
 	float fadeInTime = 6.0f;
@@ -65,6 +71,9 @@ public class guiGame : MonoBehaviour {
 				
 		crosshair_xMin = Screen.width/2 - ( crosshairImage.width/2 );
 		crosshair_yMin = Screen.height/2 - ( crosshairImage.height/2 );
+		
+		allPlayers = networkManager.otherPlayers;
+		allPlayers.Add(networkManager.my);
 	}
 		
 	IEnumerator FadeAudio (GameObject obj, float timer, Fade fadeType) {
@@ -94,6 +103,24 @@ public class guiGame : MonoBehaviour {
 				movementController.inMenu = true;
 			}
 		}
+		
+		if ( Input.GetButtonDown("Scoreboard") ) {
+		
+			if( isScoreboardOpen ) { 
+				isScoreboardOpen = false;
+				Screen.lockCursor = true;
+				movementController.inMenu = false;
+			} else { 
+				isScoreboardOpen = true; 
+				Screen.lockCursor = false;
+				movementController.inMenu = true;
+			}
+		}
+	}
+	
+	public void UpdateAllPlayers() {
+		allPlayers = networkManager.otherPlayers;
+		allPlayers.Add(networkManager.my);
 	}
 	
 	void OnGUI() {		
@@ -121,6 +148,16 @@ public class guiGame : MonoBehaviour {
 			
 			if( GUI.Button(new Rect(Screen.width-350,40,300,40),"Exit to Main Menu",GameMenuStyle) ) {
 				NetworkManager.DisconnectFromServer();
+			}
+		}
+		
+		if( isScoreboardOpen ) {
+			GUI.DrawTexture(new Rect(50,50,Screen.width-100,Screen.height-100),scoreboardBG,ScaleMode.StretchToFill);
+			
+			var newList = allPlayers.OrderByDescending(x => x.score).ToList();
+			
+			for (int i = 0; i < newList.Count; i++) {
+				GUI.Label(new Rect(50,100 + (i+1)*50,500,20),newList[i].name + "  " + newList[i].score,HUDStyle_large);
 			}
 		}
 	}

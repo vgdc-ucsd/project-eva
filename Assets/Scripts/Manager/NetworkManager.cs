@@ -128,10 +128,13 @@ public class NetworkManager : MonoBehaviour {
 
 	// Called when a player disconnects (server side)
 	void OnPlayerDisconnected( NetworkPlayer player ) {
-		NetworkViewID id = otherPlayers.Find( ( x => x.playerInfo == player ) ).avatar.networkView.viewID;
+		Player disconnectedPlayer = FindPlayer( player );
+		otherPlayers.Remove( disconnectedPlayer );
+		mainGUI.UpdateAllPlayers();
+		
 		Network.RemoveRPCs( player );
 		Network.DestroyPlayerObjects( player ); //added to test if this changes "lingering"
-		networkView.RPC("RemoveObject", RPCMode.Others, id );
+		networkView.RPC("RemoveObject", RPCMode.Others, player );
 	}
 	
 	// Called when we disconnect (client side)
@@ -181,7 +184,12 @@ public class NetworkManager : MonoBehaviour {
 	}
 
 	[RPC]
-	void RemoveObject( NetworkViewID id ) {
+	void RemoveObject( NetworkPlayer player ) {
+		Player disconnectedPlayer = FindPlayer( player );
+		otherPlayers.Remove( disconnectedPlayer );
+		
+		NetworkViewID id = disconnectedPlayer.avatar.networkView.viewID;
+		mainGUI.UpdateAllPlayers();
 		Destroy( NetworkView.Find( id ).gameObject );
 		Debug.Log( "Object with NetworkViewId " + id.ToString() + " removed" );
 	}
