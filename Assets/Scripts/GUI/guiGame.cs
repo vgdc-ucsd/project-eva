@@ -13,6 +13,8 @@ public class guiGame : MonoBehaviour {
 	public GUIStyle HUDStyle_small;
 	public GUIStyle HPCountStyle;
 	public GUIStyle GameMenuStyle;
+	public GUIStyle ScoreBoardStyle;
+	public GUIStyle MyScoreStyle;
 	public string id;
 	private PlayerBoost boostController;
 	private PlayerWeapons weaponController;
@@ -31,6 +33,8 @@ public class guiGame : MonoBehaviour {
 	
 	private bool isMenuOpen = false;
 	private bool isScoreboardOpen = false;
+	private bool finalScoreboardOpen = false;
+	private bool hudEnabled = true;
 	
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
@@ -104,16 +108,12 @@ public class guiGame : MonoBehaviour {
 			}
 		}
 		
-		if ( Input.GetButtonDown("Scoreboard") ) {
+		if ( Input.GetButtonDown("Scoreboard") && !finalScoreboardOpen ) {
 		
 			if( isScoreboardOpen ) { 
 				isScoreboardOpen = false;
-				Screen.lockCursor = true;
-				movementController.inMenu = false;
 			} else { 
 				isScoreboardOpen = true; 
-				Screen.lockCursor = false;
-				movementController.inMenu = true;
 			}
 		}
 	}
@@ -123,25 +123,41 @@ public class guiGame : MonoBehaviour {
 		allPlayers.Add(networkManager.my);
 	}
 	
+	public void ToggleFinalScoreboard() {
+		if (!finalScoreboardOpen) {
+			finalScoreboardOpen = true;	
+		} else { finalScoreboardOpen = false; }
+	}
+	
+	public void ToggleHUD() {
+		if (hudEnabled) {
+			hudEnabled = false;	
+		} else { hudEnabled = true; }			
+	}
+	
 	void OnGUI() {		
 		currentAmmo = weaponController.GetWeaponCurrentAmmo();
 		spareAmmo = weaponController.GetWeaponSpareAmmo();
 		currentHealth = healthController.GetCurrentHP();
+		
+		if( hudEnabled ) {
 
-		GUI.DrawTexture(new Rect(crosshair_xMin,crosshair_yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
-		GUI.Label(new Rect(Screen.width-200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
-		GUI.Label(new Rect(Screen.width-200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
-		GUI.Label(new Rect(10,20,100,20),id,HUDStyle_small);
-		GUI.Label(new Rect(10,40,100,20),"Score: " + networkManager.my.score,HUDStyle_small);
+			GUI.DrawTexture(new Rect(crosshair_xMin,crosshair_yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
+			GUI.Label(new Rect(Screen.width-200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
+			GUI.Label(new Rect(Screen.width-200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
+			GUI.Label(new Rect(10,20,100,20),id,HUDStyle_small);
+			GUI.Label(new Rect(10,40,100,20),"Score: " + networkManager.my.score,HUDStyle_small);
 		
-		currWidth = 300 * (currentHealth / maxHealth);
+			currWidth = 300 * (currentHealth / maxHealth);
 		
-		GUI.Label(new Rect(0,Screen.height - 75,90,18),"Armor:",HUDStyle_small);
-		GUI.Label(new Rect(140,Screen.height - 80,30,30)," " + currentHealth,HUDStyle_large);
+			GUI.Label(new Rect(0,Screen.height - 75,90,18),"Armor:",HUDStyle_small);
+			GUI.Label(new Rect(140,Screen.height - 80,30,30)," " + currentHealth,HUDStyle_large);
 		
-		GUI.BeginGroup(new Rect(20,Screen.height-50,currWidth,35));;
-		GUI.DrawTexture(new Rect(0,0,400,35),healthBar,ScaleMode.StretchToFill);
-		GUI.EndGroup();
+			GUI.BeginGroup(new Rect(20,Screen.height-50,currWidth,35));;
+			GUI.DrawTexture(new Rect(0,0,400,35),healthBar,ScaleMode.StretchToFill);
+			GUI.EndGroup();
+			
+		}
 			
 		if( isMenuOpen ) {
 			GUI.DrawTexture(new Rect(Screen.width-375,25,350,100),gameMenuBG,ScaleMode.StretchToFill);
@@ -151,13 +167,21 @@ public class guiGame : MonoBehaviour {
 			}
 		}
 		
-		if( isScoreboardOpen ) {
-			GUI.DrawTexture(new Rect(50,50,Screen.width-100,Screen.height-100),scoreboardBG,ScaleMode.StretchToFill);
+		if( isScoreboardOpen || finalScoreboardOpen ) {
+			GUI.DrawTexture(new Rect(50,50,Screen.width-100,Screen.height-150),scoreboardBG,ScaleMode.StretchToFill);
 			
 			var newList = allPlayers.OrderByDescending(x => x.score).ToList();
 			
 			for (int i = 0; i < newList.Count; i++) {
-				GUI.Label(new Rect(50,100 + (i+1)*50,500,20),newList[i].name + "  " + newList[i].score,HUDStyle_large);
+				if (networkManager.FindPlayer( newList[i].playerInfo ) == networkManager.my) {
+					GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, MyScoreStyle);
+				} else {
+					GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, ScoreBoardStyle);
+				}
+			}
+			
+			if ( finalScoreboardOpen ) {
+				GUI.Label(new Rect(300,Screen.height - 300,500,20), newList[0].name + " wins!", ScoreBoardStyle);				
 			}
 		}
 	}

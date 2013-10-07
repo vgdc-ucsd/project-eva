@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class Player {
@@ -60,7 +61,7 @@ public class NetworkManager : MonoBehaviour {
 		my = new Player();
 		my.avatar = myAvatar;
 		my.playerInfo = Network.player;
-
+		
 		gameManager.AssignCamera( myAvatar );	
 		mainGUI = myAvatar.GetComponent<guiGame>();
 		my.name = mainGUI.id;
@@ -90,6 +91,24 @@ public class NetworkManager : MonoBehaviour {
 	
 	public int FindPlayerIndex( NetworkViewID viewID ) { // cannot find yourself
 		return otherPlayers.FindIndex( (x => x.avatar.networkView.viewID == viewID ) );
+	}
+	
+	IEnumerator RestartMatch() {
+		yield return new WaitForSeconds(10);	
+		
+		//close final scoreboard
+		mainGUI.ToggleFinalScoreboard();
+		
+		//reset everything and respawn
+		my.playerHealth = 100;
+		my.score = 0;
+		gameManager.RespawnPlayer( my.avatar );
+		
+		for (int i = 0; i < otherPlayers.Count; i++) {
+			otherPlayers[i].playerHealth = 100;
+			otherPlayers[i].score = 0;
+			gameManager.RespawnPlayer( otherPlayers[i].avatar );	
+		}
 	}
 
 	/////////////////////////
@@ -219,6 +238,19 @@ public class NetworkManager : MonoBehaviour {
 			killerPlayer.score++;
 			if( killerPlayer.score >= killsToWin ) {
 				Debug.Log(killerPlayer.name + " won!");
+				
+				//kill all players
+				gameManager.KillPlayer( my.avatar );
+				
+				for (int i = 0; i < otherPlayers.Count; i++) {
+					gameManager.KillPlayer( otherPlayers[i].avatar );	
+				}
+				
+				//open final scoreboard
+				mainGUI.ToggleFinalScoreboard();
+				
+				//restart the level, respawn players
+				StartCoroutine( "RestartMatch" );
 			}
 		}
 	}

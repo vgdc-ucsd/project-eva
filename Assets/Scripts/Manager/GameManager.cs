@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour {
 		deadPlayer.SetActive(false);
 		
 		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
-		mainGUI.enabled = false;
+		mainGUI.ToggleHUD();
 	}
 	
 	public void RespawnPlayer( GameObject deadPlayer ) {
@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour {
 		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
 		cameraScript.enabled = true;	
 		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
-		mainGUI.enabled = true;
+		mainGUI.ToggleHUD();
 		
 		networkManager.networkView.RPC("ResumeRendering",RPCMode.Others, networkManager.my.playerInfo);
 		deadPlayer.SetActive(true);
