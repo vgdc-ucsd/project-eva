@@ -89,9 +89,12 @@ public class GameManager : MonoBehaviour {
 		cameraScript.enabled = true;	
 		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
 		mainGUI.ToggleHUD();
-		
-		networkManager.networkView.RPC("ResumeRendering",RPCMode.Others, networkManager.my.playerInfo);
+
+		networkManager.networkView.RPC("ResumeRendering", RPCMode.Others, networkManager.my.playerInfo);
 		deadPlayer.SetActive(true);
+		
+		PlayerWeapons weaponController = deadPlayer.GetComponent<PlayerWeapons>();
+		weaponController.WeaponsReset();
 	}
 
 	public GameObject SpawnPlayer( Vector3 position, Quaternion rotation ) {

@@ -43,12 +43,12 @@ public class PlayerHP : MonoBehaviour {
 		if (networkManager.my.playerHealth <= 0) {
 			Debug.Log("I died. Respawning...!");
 			
-			networkManager.networkView.RPC("StopRendering", RPCMode.Others, networkManager.my.playerInfo);
-			networkManager.networkView.RPC("ReportDeath", RPCMode.All, networkManager.my.avatar.networkView.viewID, attackerID);	
+			networkManager.networkView.RPC("StopRendering", RPCMode.OthersBuffered, networkManager.my.playerInfo);
+			networkManager.networkView.RPC("ReportDeath", RPCMode.AllBuffered, networkManager.my.avatar.networkView.viewID, attackerID);	
 
 			gameManager.KillPlayer( networkManager.my.avatar );
-			networkManager.my.playerHealth = maxHealth;
-			gameManager.RespawnPlayer( networkManager.my.avatar );
+			networkManager.my.playerHealth = maxHealth;		
+			gameManager.RespawnPlayer( networkManager.my.avatar );	
 		}
 	}
 	
@@ -61,8 +61,8 @@ public class PlayerHP : MonoBehaviour {
 		if( networkManager.my.playerHealth <= 0 ) {
 			Debug.Log("I suicided. Respawning...!");
 			
-			networkManager.networkView.RPC("StopRendering", RPCMode.Others, networkManager.my.playerInfo);
-			networkManager.networkView.RPC("ReportDeath", RPCMode.All, networkManager.my.avatar.networkView.viewID, networkManager.my.avatar.networkView.viewID);
+			networkManager.networkView.RPC("StopRendering", RPCMode.OthersBuffered, networkManager.my.playerInfo);
+			networkManager.networkView.RPC("ReportDeath", RPCMode.AllBuffered, networkManager.my.avatar.networkView.viewID, networkManager.my.avatar.networkView.viewID);
 			
 			gameManager.KillPlayer( networkManager.my.avatar );
 			networkManager.my.playerHealth = maxHealth;

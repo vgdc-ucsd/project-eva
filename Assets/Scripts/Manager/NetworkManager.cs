@@ -22,6 +22,7 @@ public class NetworkManager : MonoBehaviour {
 	private int killsToWin;
 	private guiGame mainGUI;
 	private GameManager gameManager;
+	private PlayerWeapons weaponController;
 	private static NetworkManager instance = null;
 	
 	public static NetworkManager Instance {
@@ -41,6 +42,7 @@ public class NetworkManager : MonoBehaviour {
 	void Start() {
 		otherPlayers = new List<Player>();
 		gameManager = GameObject.FindGameObjectWithTag( Tags.GameController ).GetComponent<GameManager>();
+		weaponController = my.avatar.GetComponent<PlayerWeapons>();
 	}
 
 	public static void StartServer() {
@@ -103,6 +105,7 @@ public class NetworkManager : MonoBehaviour {
 		my.playerHealth = 100;
 		my.score = 0;
 		gameManager.RespawnPlayer( my.avatar );
+		weaponController.WeaponsReset();
 		
 		for (int i = 0; i < otherPlayers.Count; i++) {
 			otherPlayers[i].playerHealth = 100;
@@ -250,7 +253,7 @@ public class NetworkManager : MonoBehaviour {
 				mainGUI.ToggleFinalScoreboard();
 				
 				//restart the level, respawn players
-				StartCoroutine( "RestartMatch" );
+				StartCoroutine( RestartMatch() );
 			}
 		}
 	}

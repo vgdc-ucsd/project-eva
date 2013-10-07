@@ -95,6 +95,20 @@ public class PlayerWeapons : MonoBehaviour {
 			} else { return false; }
 	}
 	
+	public void WeaponsReset() {
+			
+		// Populate list of weapons, with player only owning the starting weapon
+		for (int i=0; i<totalWeapons; ++i) {
+			weaponSlots[i] = null;
+		}
+		weaponSlots[0] = assaultRifleScript;
+		availWeapons = 1;
+		
+		// Set starting weapon as active with full ammo
+		SetCurrentWeapon( "AssaultRifle" );
+		SetWeaponCurrentAmmo( 1000 );
+	}
+	
 	//These getters are for specific weapons (to query ammo counts of weapons not currently equipped)
 	//New ones will need to be written as weapons are implemented
 	public float GetSniperCurrentAmmo() {
