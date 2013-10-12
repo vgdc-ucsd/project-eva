@@ -43,7 +43,6 @@ public class NetworkManager : MonoBehaviour {
 	void Start() {
 		otherPlayers = new List<Player>();
 		gameManager = GameObject.FindGameObjectWithTag( Tags.GameController ).GetComponent<GameManager>();
-		weaponController = my.avatar.GetComponent<PlayerWeapons>();
 	}
 
 	public static void StartServer() {
@@ -67,6 +66,8 @@ public class NetworkManager : MonoBehaviour {
 		
 		gameManager.AssignCamera( myAvatar );	
 		mainGUI = myAvatar.GetComponent<guiGame>();
+		weaponController = myAvatar.GetComponent<PlayerWeapons>();
+
 		my.name = mainGUI.id;
 
 		// Tell other players we've connected
@@ -98,6 +99,13 @@ public class NetworkManager : MonoBehaviour {
 	
 	IEnumerator RestartMatch() {
 		yield return new WaitForSeconds(10);	
+		
+		//kill all players
+		gameManager.KillPlayer( my.avatar );
+				
+		for (int i = 0; i < otherPlayers.Count; i++) {
+			gameManager.KillPlayer( otherPlayers[i].avatar );	
+		}
 		
 		//close final scoreboard
 		mainGUI.ToggleFinalScoreboard();
@@ -243,13 +251,6 @@ public class NetworkManager : MonoBehaviour {
 			killerPlayer.score++;
 			if( killerPlayer.score >= killsToWin ) {
 				Debug.Log(killerPlayer.name + " won!");
-				
-				//kill all players
-				gameManager.KillPlayer( my.avatar );
-				
-				for (int i = 0; i < otherPlayers.Count; i++) {
-					gameManager.KillPlayer( otherPlayers[i].avatar );	
-				}
 				
 				//open final scoreboard
 				mainGUI.ToggleFinalScoreboard();

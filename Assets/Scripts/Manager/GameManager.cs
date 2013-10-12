@@ -56,9 +56,6 @@ public class GameManager : MonoBehaviour {
 		Debug.Log( "Killing player" );		
 		GameObject camera = GameObject.FindGameObjectWithTag( "MainCamera" );
 		
-		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
-		cameraScript.enabled = false;
-		
 		deadPlayer.SetActive(false);
 		
 		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
@@ -84,9 +81,7 @@ public class GameManager : MonoBehaviour {
 
 		deadPlayer.transform.position = spawn.position;
 		deadPlayer.transform.rotation = spawn.rotation;
-		
-		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
-		cameraScript.enabled = true;	
+	
 		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
 		mainGUI.ToggleHUD();
 
