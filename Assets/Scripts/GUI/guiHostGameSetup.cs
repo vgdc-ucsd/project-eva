@@ -15,6 +15,8 @@ public class guiHostGameSetup : MonoBehaviour {
 	public Texture2D background;
 	private bool mapchoice1 = false;
 	private string text;
+	private string[] gameTypes;
+	private int gameTypeSelect;
 	
 	void Awake() {
 		if (PlayerOptions.host_killsToWin == 0) {
@@ -23,6 +25,14 @@ public class guiHostGameSetup : MonoBehaviour {
 		} else {
 			text = PlayerOptions.host_killsToWin.ToString();	
 		}
+	}
+	
+	void Start() {
+		gameTypes = new string[2];
+		gameTypes[0] = "Free-for-all";
+		gameTypes[1] = "Team Deathmatch";
+		
+		gameTypeSelect = PlayerOptions.host_gameType;
 	}
 	
 	void OnGUI() {
@@ -35,6 +45,10 @@ public class guiHostGameSetup : MonoBehaviour {
 	
 		text = GUI.TextField(new Rect(200,450,50,20),text);
 		text = Regex.Replace(text,@"[^0-9]", ""); //Only allow integers
+		
+		GUI.Label(new Rect(100,500,100,100),"Game Type",textStyle);
+		gameTypeSelect = GUI.SelectionGrid(new Rect(115,525,350,20), gameTypeSelect, gameTypes, 2);
+		PlayerOptions.host_gameType = gameTypeSelect;
 		
 		if( string.Equals(text,"0") ) { //Do not let user set value to zero
 			text = "1";	

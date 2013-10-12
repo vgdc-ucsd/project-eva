@@ -20,6 +20,7 @@ public class NetworkManager : MonoBehaviour {
 	public List<Player> otherPlayers;
 	public Player my;
 	private int killsToWin;
+	private int gameType;
 	private guiGame mainGUI;
 	private GameManager gameManager;
 	private PlayerWeapons weaponController;
@@ -127,6 +128,7 @@ public class NetworkManager : MonoBehaviour {
 		Application.LoadLevel( 2 );
 		
 		killsToWin = PlayerOptions.host_killsToWin;
+		gameType = PlayerOptions.host_gameType;
 		
 		Network.isMessageQueueRunning = true;
 		Network.SetSendingEnabled(0,true);
@@ -135,7 +137,7 @@ public class NetworkManager : MonoBehaviour {
 	// Called when a player connects (server side)
 	void OnPlayerConnected( NetworkPlayer playerInfo ) {
 		//Tell the new player the kill limit
-		networkView.RPC("SpecifyKillLimit", playerInfo, killsToWin);
+		networkView.RPC("SpecifyGameOptions", playerInfo, killsToWin, gameType);
 	}
 
 	// Called when the player connects (client side)
@@ -259,7 +261,8 @@ public class NetworkManager : MonoBehaviour {
 	}
 	
 	[RPC]
-	void SpecifyKillLimit( int limit ) {
+	void SpecifyGameOptions( int limit, int type ) {
 		killsToWin = limit;
+		gameType = type;
 	}
 }
