@@ -9,7 +9,6 @@ public class guiMenu : MonoBehaviour {
 	public GUIStyle enterIPStyle;
 	public string joinIP;
 	private bool toggleIP = false;
-	private bool hitReturn = false;
 	
 	void Awake() {
 		logo = GameObject.Find("logo");

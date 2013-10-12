@@ -15,6 +15,9 @@ public class guiGame : MonoBehaviour {
 	public GUIStyle GameMenuStyle;
 	public GUIStyle ScoreBoardStyle;
 	public GUIStyle MyScoreStyle;
+	public GUIStyle RedTeamStyle;
+	public GUIStyle BlueTeamStyle;
+	
 	public string id;
 	private PlayerBoost boostController;
 	private PlayerWeapons weaponController;
@@ -34,7 +37,8 @@ public class guiGame : MonoBehaviour {
 	private bool isMenuOpen = false;
 	private bool isScoreboardOpen = false;
 	private bool finalScoreboardOpen = false;
-	private bool hudEnabled = true;
+	private bool hudEnabled = false;
+	private bool choosingTeam = true;
 	
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
@@ -101,10 +105,12 @@ public class guiGame : MonoBehaviour {
 				isMenuOpen = false;
 				Screen.lockCursor = true;
 				movementController.inMenu = false;
+				weaponController.EnableWeapons();
 			} else { 
 				isMenuOpen = true; 
 				Screen.lockCursor = false;
 				movementController.inMenu = true;
+				weaponController.DisableWeapons();
 			}
 		}
 		
@@ -140,13 +146,34 @@ public class guiGame : MonoBehaviour {
 		spareAmmo = weaponController.GetWeaponSpareAmmo();
 		currentHealth = healthController.GetCurrentHP();
 		
+		if( choosingTeam ) {
+			Screen.lockCursor = false;
+			movementController.inMenu = true;
+			weaponController.DisableWeapons();
+			
+			if( GUI.Button(new Rect(Screen.width/2-300,Screen.height/2,300,40),"Red Team",RedTeamStyle) ) {
+				choosingTeam = false;
+				hudEnabled = true;
+				Screen.lockCursor = true;
+				movementController.inMenu = false;
+				weaponController.EnableWeapons();
+				networkManager.EnterBattle(1); // Enter the battle in team 1
+			}
+			if( GUI.Button(new Rect(Screen.width/2,Screen.height/2,300,40),"Blue Team",BlueTeamStyle) ) {
+				choosingTeam = false;
+				hudEnabled = true;
+				Screen.lockCursor = true;
+				movementController.inMenu = false;
+				weaponController.EnableWeapons();
+				networkManager.EnterBattle(2); // Enter the battle in team 2
+			}
+		}
+		
 		if( hudEnabled ) {
 
 			GUI.DrawTexture(new Rect(crosshair_xMin,crosshair_yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
 			GUI.Label(new Rect(Screen.width-200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
 			GUI.Label(new Rect(Screen.width-200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
-			GUI.Label(new Rect(10,20,100,20),id,HUDStyle_small);
-			GUI.Label(new Rect(10,40,100,20),"Score: " + networkManager.my.score,HUDStyle_small);
 		
 			currWidth = 300 * (currentHealth / maxHealth);
 		
@@ -180,7 +207,7 @@ public class guiGame : MonoBehaviour {
 				}
 			}
 			
-			if ( finalScoreboardOpen ) {
+			if( finalScoreboardOpen ) {
 				GUI.Label(new Rect(300,Screen.height - 300,500,20), newList[0].name + " wins!", ScoreBoardStyle);				
 			}
 		}

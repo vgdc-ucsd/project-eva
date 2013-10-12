@@ -54,7 +54,6 @@ public class GameManager : MonoBehaviour {
 	// Kill a player
 	public void KillPlayer( GameObject deadPlayer ) {
 		Debug.Log( "Killing player" );		
-		GameObject camera = GameObject.FindGameObjectWithTag( "MainCamera" );
 		
 		deadPlayer.SetActive(false);
 		
@@ -75,10 +74,8 @@ public class GameManager : MonoBehaviour {
 	
 	IEnumerator RespawnTimer( GameObject deadPlayer ) {
 		yield return new WaitForSeconds( respawnTime );
-		
-		Transform spawn = spawnPoints[Random.Range( 0, spawnPoints.Count )];
-		GameObject camera = GameObject.FindGameObjectWithTag( "MainCamera" );
 
+		Transform spawn = spawnPoints[Random.Range( 0, spawnPoints.Count )];
 		deadPlayer.transform.position = spawn.position;
 		deadPlayer.transform.rotation = spawn.rotation;
 	

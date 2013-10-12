@@ -95,6 +95,16 @@ public class PlayerWeapons : MonoBehaviour {
 			} else { return false; }
 	}
 	
+	public void DisableWeapons() { // called from GUI to disable weapons in menu
+		if (!currentWeaponScript.enabled) return;
+		currentWeaponScript.enabled = false;
+	}
+	
+	public void EnableWeapons() {
+		if (currentWeaponScript.enabled) return;
+		currentWeaponScript.enabled = true;
+	}
+	
 	public void WeaponsReset() {
 			
 		// Populate list of weapons, with player only owning the starting weapon

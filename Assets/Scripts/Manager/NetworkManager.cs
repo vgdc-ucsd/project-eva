@@ -8,6 +8,7 @@ public class Player {
 	public float playerHealth;
 	public string name;
 	public int score;
+	public int team;
 }
 
 public class NetworkManager : MonoBehaviour {
@@ -67,14 +68,19 @@ public class NetworkManager : MonoBehaviour {
 		gameManager.AssignCamera( myAvatar );	
 		mainGUI = myAvatar.GetComponent<guiGame>();
 		weaponController = myAvatar.GetComponent<PlayerWeapons>();
-
+		
 		my.name = mainGUI.id;
-
+		
+	}
+	
+	public void EnterBattle(int team) {
+		my.team = team;
+		
 		// Tell other players we've connected
-		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, my.name, myAvatar.networkView.viewID, myAvatar.transform.position, myAvatar.transform.rotation );
+		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, my.name, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
 
 		// Request each other player's state at the time of connection
-		networkView.RPC( "RequestIntialPlayerState", RPCMode.OthersBuffered, Network.player );
+		networkView.RPC( "RequestIntialPlayerState", RPCMode.OthersBuffered, Network.player );	
 	}
 	
 	public Player FindPlayer( NetworkPlayer player ) {
