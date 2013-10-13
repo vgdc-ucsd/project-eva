@@ -9,7 +9,6 @@ public class guiMenu : MonoBehaviour {
 	public GUIStyle enterIPStyle;
 	public string joinIP;
 	private bool toggleIP = false;
-	private bool hitReturn = false;
 	
 	void Awake() {
 		logo = GameObject.Find("logo");
@@ -19,7 +18,6 @@ public class guiMenu : MonoBehaviour {
 	}
 	
 	void OnGUI() {		
-		//Create button to load demo scene	
 		if( GUI.Button(new Rect(0,Screen.height/2+55,400,50),"Host",myStyle) ){
 			Application.LoadLevel(1);
 		}
@@ -29,16 +27,11 @@ public class guiMenu : MonoBehaviour {
 		if( toggleIP ) {
 			GUI.Label(new Rect(560,Screen.height/2+65,200,50),"Enter the IP of the game you wish to join: ",enterIPtextStyle);
 			
-			Event e = Event.current;
-			if( e.keyCode == KeyCode.Return ) {
-				hitReturn = true;
-			}
 			joinIP = GUI.TextField(new Rect(450,Screen.height/2+55*2,425,50),joinIP,enterIPStyle);
 			
 			if ( GUI.Button( new Rect( 450, Screen.height / 2 + 100 * 2, 425, 50 ), "Join" ) ) {
 				NetworkManager.ConnectToServer( joinIP );
 			}
-			if( hitReturn ) { NetworkManager.ConnectToServer( joinIP ); }
 		}
 		
 		if( GUI.Button(new Rect(0,Screen.height/2+55*3,400,50),"Options",myStyle) ){

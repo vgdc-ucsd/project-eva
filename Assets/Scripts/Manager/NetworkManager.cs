@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
-public struct Player 
-{
+public class Player {
 	public GameObject avatar;
 	public NetworkPlayer playerInfo;
 	public float playerHealth;
+	public string name;
 	public int score;
+	public int team;
 }
 
 public class NetworkManager : MonoBehaviour {
@@ -18,8 +20,11 @@ public class NetworkManager : MonoBehaviour {
 	const int MAX_CONNECTIONS = 16;
 	public List<Player> otherPlayers;
 	public Player my;
-
+	private int killsToWin;
+	private int gameType;
+	private guiGame mainGUI;
 	private GameManager gameManager;
+	private PlayerWeapons weaponController;
 	private static NetworkManager instance = null;
 	
 	public static NetworkManager Instance {
@@ -59,14 +64,23 @@ public class NetworkManager : MonoBehaviour {
 		my = new Player();
 		my.avatar = myAvatar;
 		my.playerInfo = Network.player;
-
-		gameManager.AssignCamera( myAvatar );
-
+		
+		gameManager.AssignCamera( myAvatar );	
+		mainGUI = myAvatar.GetComponent<guiGame>();
+		weaponController = myAvatar.GetComponent<PlayerWeapons>();
+		
+		my.name = mainGUI.id;
+		
+	}
+	
+	public void EnterBattle(int team) {
+		my.team = team;
+		
 		// Tell other players we've connected
-		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, myAvatar.networkView.viewID, myAvatar.transform.position, myAvatar.transform.rotation );
+		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, my.name, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
 
 		// Request each other player's state at the time of connection
-		networkView.RPC( "RequestIntialPlayerState", RPCMode.OthersBuffered, Network.player );
+		networkView.RPC( "RequestIntialPlayerState", RPCMode.OthersBuffered, Network.player );	
 	}
 	
 	public Player FindPlayer( NetworkPlayer player ) {
@@ -74,6 +88,44 @@ public class NetworkManager : MonoBehaviour {
 			return my; 
 		} else {
 			return otherPlayers.Find( ( x => x.playerInfo == player ) );
+		}
+	} 
+	
+	public Player FindPlayerByViewID( NetworkViewID viewID ) {
+		if ( viewID == my.avatar.networkView.viewID ) {
+			return my;	
+		} else {
+			return otherPlayers.Find ( (x => x.avatar.networkView.viewID == viewID ) );	
+		}
+	}
+	
+	public int FindPlayerIndex( NetworkViewID viewID ) { // cannot find yourself
+		return otherPlayers.FindIndex( (x => x.avatar.networkView.viewID == viewID ) );
+	}
+	
+	IEnumerator RestartMatch() {
+		yield return new WaitForSeconds(10);	
+		
+		//kill all players
+		gameManager.KillPlayer( my.avatar );
+				
+		for (int i = 0; i < otherPlayers.Count; i++) {
+			gameManager.KillPlayer( otherPlayers[i].avatar );	
+		}
+		
+		//close final scoreboard
+		mainGUI.ToggleFinalScoreboard();
+		
+		//reset everything and respawn
+		my.playerHealth = 100;
+		my.score = 0;
+		gameManager.RespawnPlayer( my.avatar );
+		weaponController.WeaponsReset();
+		
+		for (int i = 0; i < otherPlayers.Count; i++) {
+			otherPlayers[i].playerHealth = 100;
+			otherPlayers[i].score = 0;
+			gameManager.RespawnPlayer( otherPlayers[i].avatar );	
 		}
 	}
 
@@ -84,18 +136,22 @@ public class NetworkManager : MonoBehaviour {
 	// Called when the server goes up
 	void OnServerInitialized() {
 		Debug.Log( "Server Initialized" );
-		
 		Network.SetSendingEnabled(0,false);
 		Network.isMessageQueueRunning = false;
 		Network.SetLevelPrefix ( 2 );
 		Application.LoadLevel( 2 );
+		
+		killsToWin = PlayerOptions.host_killsToWin;
+		gameType = PlayerOptions.host_gameType;
+		
 		Network.isMessageQueueRunning = true;
 		Network.SetSendingEnabled(0,true);
 	}
 
-	// Caled when a player connects (server side)
+	// Called when a player connects (server side)
 	void OnPlayerConnected( NetworkPlayer playerInfo ) {
-		
+		//Tell the new player the kill limit
+		networkView.RPC("SpecifyGameOptions", playerInfo, killsToWin, gameType);
 	}
 
 	// Called when the player connects (client side)
@@ -110,10 +166,13 @@ public class NetworkManager : MonoBehaviour {
 
 	// Called when a player disconnects (server side)
 	void OnPlayerDisconnected( NetworkPlayer player ) {
-		NetworkViewID id = otherPlayers.Find( ( x => x.playerInfo == player ) ).avatar.networkView.viewID;
+		Player disconnectedPlayer = FindPlayer( player );
+		otherPlayers.Remove( disconnectedPlayer );
+		mainGUI.UpdateAllPlayers();
+		
 		Network.RemoveRPCs( player );
 		Network.DestroyPlayerObjects( player ); //added to test if this changes "lingering"
-		networkView.RPC( "RemoveObject", RPCMode.Others, id );
+		networkView.RPC("RemoveObject", RPCMode.Others, player );
 	}
 	
 	// Called when we disconnect (client side)
@@ -138,22 +197,24 @@ public class NetworkManager : MonoBehaviour {
 	/////////////////////////
 	[RPC]
 	void RequestIntialPlayerState( NetworkPlayer requester ) {
-		networkView.RPC( "GetCurrentPlayerState", requester, my.playerInfo, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
+		networkView.RPC( "GetCurrentPlayerState", requester, my.playerInfo, my.name, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
 	}
 
 	[RPC]
-	void GetNewPlayerState( NetworkPlayer playerInfo, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
+	void GetNewPlayerState( NetworkPlayer playerInfo, string playerName, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
 		Player newPlayer = new Player();
 		newPlayer.playerInfo = playerInfo;
+		newPlayer.name = playerName;
 		GameObject playerAvatar = NetworkView.Find( avatarID ).gameObject;
 		newPlayer.avatar = playerAvatar;
 		otherPlayers.Add( newPlayer );
 	}
 
 	[RPC]
-	void GetCurrentPlayerState( NetworkPlayer playerInfo, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
+	void GetCurrentPlayerState( NetworkPlayer playerInfo, string playerName, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
 		Player newPlayer = new Player();
 		newPlayer.playerInfo = playerInfo;
+		newPlayer.name = playerName;
 		GameObject playerAvatar = gameManager.SpawnPlayer( initialPosition, initialRotation );
 		playerAvatar.networkView.viewID = avatarID;
 		newPlayer.avatar = playerAvatar;
@@ -161,7 +222,12 @@ public class NetworkManager : MonoBehaviour {
 	}
 
 	[RPC]
-	void RemoveObject( NetworkViewID id ) {
+	void RemoveObject( NetworkPlayer player ) {
+		Player disconnectedPlayer = FindPlayer( player );
+		otherPlayers.Remove( disconnectedPlayer );
+		
+		NetworkViewID id = disconnectedPlayer.avatar.networkView.viewID;
+		mainGUI.UpdateAllPlayers();
 		Destroy( NetworkView.Find( id ).gameObject );
 		Debug.Log( "Object with NetworkViewId " + id.ToString() + " removed" );
 	}
@@ -179,15 +245,31 @@ public class NetworkManager : MonoBehaviour {
 	}
 	
 	[RPC]
-	void ReportDeath( NetworkPlayer deadPlayer, NetworkPlayer killer ) {
-		Player dead = FindPlayer( deadPlayer );
-		
+	void ReportDeath( NetworkViewID deadPlayerID, NetworkViewID killerID ) {
+		Player deadPlayer = FindPlayerByViewID( deadPlayerID );
+		Player killerPlayer = FindPlayerByViewID( killerID );
+				
 		// if killer is same as dead player (ie. suicide), then reduce dead player's score by 1
-		if (deadPlayer == killer) { 
-			dead.score--; 
-		} else { 
-			Player killerPlayer = FindPlayer( killer );
-			killerPlayer.score++;	
+		if (deadPlayerID == killerID) { 
+			deadPlayer.score--;
+		} else { // increase killer's score by one
+			
+			killerPlayer.score++;
+			if( killerPlayer.score >= killsToWin ) {
+				Debug.Log(killerPlayer.name + " won!");
+				
+				//open final scoreboard
+				mainGUI.ToggleFinalScoreboard();
+				
+				//restart the level, respawn players
+				StartCoroutine( RestartMatch() );
+			}
 		}
+	}
+	
+	[RPC]
+	void SpecifyGameOptions( int limit, int type ) {
+		killsToWin = limit;
+		gameType = type;
 	}
 }

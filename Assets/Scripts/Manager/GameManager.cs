@@ -54,15 +54,11 @@ public class GameManager : MonoBehaviour {
 	// Kill a player
 	public void KillPlayer( GameObject deadPlayer ) {
 		Debug.Log( "Killing player" );		
-		GameObject camera = GameObject.FindGameObjectWithTag( "MainCamera" );
-		
-		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
-		cameraScript.enabled = false;
 		
 		deadPlayer.SetActive(false);
 		
 		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
-		mainGUI.enabled = false;
+		mainGUI.ToggleHUD();
 	}
 	
 	public void RespawnPlayer( GameObject deadPlayer ) {
@@ -78,20 +74,19 @@ public class GameManager : MonoBehaviour {
 	
 	IEnumerator RespawnTimer( GameObject deadPlayer ) {
 		yield return new WaitForSeconds( respawnTime );
-		
-		Transform spawn = spawnPoints[Random.Range( 0, spawnPoints.Count )];
-		GameObject camera = GameObject.FindGameObjectWithTag( "MainCamera" );
 
+		Transform spawn = spawnPoints[Random.Range( 0, spawnPoints.Count )];
 		deadPlayer.transform.position = spawn.position;
 		deadPlayer.transform.rotation = spawn.rotation;
-		
-		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
-		cameraScript.enabled = true;	
+	
 		guiGame mainGUI = deadPlayer.GetComponent<guiGame>();
-		mainGUI.enabled = true;
-		
-		networkManager.networkView.RPC("ResumeRendering",RPCMode.Others, networkManager.my.playerInfo);
+		mainGUI.ToggleHUD();
+
+		networkManager.networkView.RPC("ResumeRendering", RPCMode.Others, networkManager.my.playerInfo);
 		deadPlayer.SetActive(true);
+		
+		PlayerWeapons weaponController = deadPlayer.GetComponent<PlayerWeapons>();
+		weaponController.WeaponsReset();
 	}
 
 	public GameObject SpawnPlayer( Vector3 position, Quaternion rotation ) {

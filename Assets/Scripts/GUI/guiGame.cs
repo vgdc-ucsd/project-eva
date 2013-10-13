@@ -1,15 +1,24 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class guiGame : MonoBehaviour {
 
 	public Texture2D crosshairImage;
 	public Texture2D healthBar;
 	public Texture2D gameMenuBG;
+	public Texture2D scoreboardBG;
 	public GUIStyle HUDStyle_large;
 	public GUIStyle HUDStyle_small;
 	public GUIStyle HPCountStyle;
 	public GUIStyle GameMenuStyle;
+	public GUIStyle ScoreBoardStyle;
+	public GUIStyle MyScoreStyle;
+	public GUIStyle RedTeamStyle;
+	public GUIStyle BlueTeamStyle;
+	
+	public string id;
 	private PlayerBoost boostController;
 	private PlayerWeapons weaponController;
 	private PlayerHP healthController;
@@ -18,19 +27,34 @@ public class guiGame : MonoBehaviour {
 	private float maxHealth;
 	private float currentAmmo;
 	private	float spareAmmo;
+	
 	private float currWidth;
-	private string id;
 	private GameObject MenuMusic;
 	private GameObject BattleMusic;
+	private NetworkManager networkManager;
+	private List<Player> allPlayers;
+	
 	private bool isMenuOpen = false;
+	private bool isScoreboardOpen = false;
+	private bool finalScoreboardOpen = false;
+	private bool hudEnabled = false;
+	private bool choosingTeam = true;
+	
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
 	float fadeInTime = 6.0f;
+	float crosshair_xMin;
+	float crosshair_yMin;
 
 	protected void Awake() {
-		
 		if( !networkView.isMine ) {
 			enabled = false;
+		}
+		
+		if( string.IsNullOrEmpty(PlayerOptions.playerID) ) {
+			id = "Jane Doe";	
+		} else {
+			id = PlayerOptions.playerID;	
 		}
 		
 		boostController = GetComponent<PlayerBoost>();
@@ -43,6 +67,7 @@ public class guiGame : MonoBehaviour {
 	void Start() {
 		MenuMusic = GameObject.FindGameObjectWithTag("MenuMusic");
 		BattleMusic = GameObject.FindGameObjectWithTag("BattleMusic");
+		networkManager = GameObject.FindGameObjectWithTag( Tags.NetworkController ).GetComponent<NetworkManager>();
 		
 		if( !MenuMusic.Equals(null) ) {
 			StartCoroutine(FadeAudio( MenuMusic, fadeOutTime, Fade.Out));
@@ -51,12 +76,12 @@ public class guiGame : MonoBehaviour {
 		if( !BattleMusic.Equals(null) ) {
 			StartCoroutine(FadeAudio( BattleMusic, fadeInTime, Fade.In));	
 		}
+				
+		crosshair_xMin = Screen.width/2 - ( crosshairImage.width/2 );
+		crosshair_yMin = Screen.height/2 - ( crosshairImage.height/2 );
 		
-		if( string.IsNullOrEmpty(PlayerOptions.playerID) ) {
-			id = "Jane Doe";	
-		} else {
-			id = PlayerOptions.playerID;	
-		}
+		allPlayers = networkManager.otherPlayers;
+		allPlayers.Add(networkManager.my);
 	}
 		
 	IEnumerator FadeAudio (GameObject obj, float timer, Fade fadeType) {
@@ -80,41 +105,110 @@ public class guiGame : MonoBehaviour {
 				isMenuOpen = false;
 				Screen.lockCursor = true;
 				movementController.inMenu = false;
+				weaponController.EnableWeapons();
 			} else { 
 				isMenuOpen = true; 
 				Screen.lockCursor = false;
 				movementController.inMenu = true;
+				weaponController.DisableWeapons();
+			}
+		}
+		
+		if ( Input.GetButtonDown("Scoreboard") && !finalScoreboardOpen ) {
+		
+			if( isScoreboardOpen ) { 
+				isScoreboardOpen = false;
+			} else { 
+				isScoreboardOpen = true; 
 			}
 		}
 	}
 	
+	public void UpdateAllPlayers() {
+		allPlayers = networkManager.otherPlayers;
+		allPlayers.Add(networkManager.my);
+	}
+	
+	public void ToggleFinalScoreboard() {
+		if (!finalScoreboardOpen) {
+			finalScoreboardOpen = true;	
+		} else { finalScoreboardOpen = false; }
+	}
+	
+	public void ToggleHUD() {
+		if (hudEnabled) {
+			hudEnabled = false;	
+		} else { hudEnabled = true; }			
+	}
+	
 	void OnGUI() {		
-		float crosshair_xMin = Screen.width/2 - ( crosshairImage.width/2 );
-		float crosshair_yMin = Screen.height/2 - ( crosshairImage.height/2 );
-
 		currentAmmo = weaponController.GetWeaponCurrentAmmo();
 		spareAmmo = weaponController.GetWeaponSpareAmmo();
 		currentHealth = healthController.GetCurrentHP();
+		
+		if( choosingTeam ) {
+			Screen.lockCursor = false;
+			movementController.inMenu = true;
+			weaponController.DisableWeapons();
+			
+			if( GUI.Button(new Rect(Screen.width/2-300,Screen.height/2,300,40),"Red Team",RedTeamStyle) ) {
+				choosingTeam = false;
+				hudEnabled = true;
+				Screen.lockCursor = true;
+				movementController.inMenu = false;
+				weaponController.EnableWeapons();
+				networkManager.EnterBattle(1); // Enter the battle in team 1
+			}
+			if( GUI.Button(new Rect(Screen.width/2,Screen.height/2,300,40),"Blue Team",BlueTeamStyle) ) {
+				choosingTeam = false;
+				hudEnabled = true;
+				Screen.lockCursor = true;
+				movementController.inMenu = false;
+				weaponController.EnableWeapons();
+				networkManager.EnterBattle(2); // Enter the battle in team 2
+			}
+		}
+		
+		if( hudEnabled ) {
 
-		GUI.DrawTexture(new Rect(crosshair_xMin,crosshair_yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
-		GUI.Label(new Rect(Screen.width-200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
-		GUI.Label(new Rect(Screen.width-200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
-		GUI.Label(new Rect(10,20,100,20),id,HUDStyle_small);
+			GUI.DrawTexture(new Rect(crosshair_xMin,crosshair_yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
+			GUI.Label(new Rect(Screen.width-200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
+			GUI.Label(new Rect(Screen.width-200,Screen.height-50,200,50),currentAmmo + " / " + spareAmmo,HUDStyle_large);
 		
-		currWidth = 300 * (currentHealth / maxHealth);
+			currWidth = 300 * (currentHealth / maxHealth);
 		
-		GUI.Label(new Rect(0,Screen.height - 75,90,18),"Armor:",HUDStyle_small);
-		GUI.Label(new Rect(140,Screen.height - 80,30,30)," " + currentHealth,HUDStyle_large);
+			GUI.Label(new Rect(0,Screen.height - 75,90,18),"Armor:",HUDStyle_small);
+			GUI.Label(new Rect(140,Screen.height - 80,30,30)," " + currentHealth,HUDStyle_large);
 		
-		GUI.BeginGroup(new Rect(20,Screen.height-50,currWidth,35));;
-		GUI.DrawTexture(new Rect(0,0,400,35),healthBar,ScaleMode.StretchToFill);
-		GUI.EndGroup();
+			GUI.BeginGroup(new Rect(20,Screen.height-50,currWidth,35));;
+			GUI.DrawTexture(new Rect(0,0,400,35),healthBar,ScaleMode.StretchToFill);
+			GUI.EndGroup();
+			
+		}
 			
 		if( isMenuOpen ) {
 			GUI.DrawTexture(new Rect(Screen.width-375,25,350,100),gameMenuBG,ScaleMode.StretchToFill);
 			
 			if( GUI.Button(new Rect(Screen.width-350,40,300,40),"Exit to Main Menu",GameMenuStyle) ) {
 				NetworkManager.DisconnectFromServer();
+			}
+		}
+		
+		if( isScoreboardOpen || finalScoreboardOpen ) {
+			GUI.DrawTexture(new Rect(50,50,Screen.width-100,Screen.height-150),scoreboardBG,ScaleMode.StretchToFill);
+			
+			var newList = allPlayers.OrderByDescending(x => x.score).ToList();
+			
+			for (int i = 0; i < newList.Count; i++) {
+				if (networkManager.FindPlayer( newList[i].playerInfo ) == networkManager.my) {
+					GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, MyScoreStyle);
+				} else {
+					GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, ScoreBoardStyle);
+				}
+			}
+			
+			if( finalScoreboardOpen ) {
+				GUI.Label(new Rect(300,Screen.height - 300,500,20), newList[0].name + " wins!", ScoreBoardStyle);				
 			}
 		}
 	}

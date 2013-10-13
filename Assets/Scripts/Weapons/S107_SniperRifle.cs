@@ -6,13 +6,15 @@ public class S107_SniperRifle : Weapon_Stats {
 	public float zoomMultiplier; //Zoom 7x (1/7)
 
 	private PlayerEffects effectsController;
-
+	private NetworkManager networkManager;
+	private NetworkViewID myViewID;
 	private bool isOnCoolDown;
 	private bool shotFired;
 
 	void Awake() {
 		player = transform.parent.gameObject;
 		effectsController = transform.parent.GetComponent<PlayerEffects>();
+		networkManager = GameObject.FindGameObjectWithTag( Tags.NetworkController ).GetComponent<NetworkManager>();
 
 		swapRate = 1.0f;
 		reloadRate = 4.0f;
@@ -33,6 +35,8 @@ public class S107_SniperRifle : Weapon_Stats {
 	}
 
 	void Start() {
+		myViewID = networkManager.my.avatar.networkView.viewID;
+		
 		Camera.main.fieldOfView = regCamView;
 		WeaponStart();
 	}
@@ -98,14 +102,14 @@ public class S107_SniperRifle : Weapon_Stats {
 
 				//object hit, null if none hit
 				GameObject hitObject = hitInfo.collider.gameObject;
-				if ( hitObject.tag == "Enemy" ) {
-					//damage enemy
-					//enemy.receiveDamage(damage);
+				
+				if ( hitObject.tag == "Player" ) {
+					NetworkPlayer hitPlayer = hitInfo.collider.networkView.owner;
+					transform.parent.networkView.RPC ("InflictDamage", hitPlayer, damage, myViewID);
 				}
 
 				if ( hitObject.tag == "Cover" ) {
-					//damage cover
-					//cover.receiveDamage(damage);
+					hitObject.SendMessage("receiveDamage", damage);
 				}
 
 				//show bullet hit particles
