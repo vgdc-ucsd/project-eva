@@ -280,6 +280,18 @@ public class NetworkManager : MonoBehaviour {
 	}
 	
 	[RPC]
+	void SwitchTeam( NetworkPlayer switchingPlayer, int newTeam ) {
+		Player switcher = FindPlayer( switchingPlayer );
+		
+		if (newTeam != switcher.team) {
+			switcher.team = newTeam;
+
+			
+			mainGUI.UpdateAllPlayers();
+		}
+	}
+	
+	[RPC]
 	void ReportDeath( NetworkViewID deadPlayerID, NetworkViewID killerID ) {
 		Player deadPlayer = FindPlayerByViewID( deadPlayerID );
 		Player killerPlayer = FindPlayerByViewID( killerID );

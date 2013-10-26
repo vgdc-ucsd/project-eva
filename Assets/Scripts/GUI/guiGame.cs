@@ -43,6 +43,7 @@ public class guiGame : MonoBehaviour {
 	private bool finalScoreboardOpen = false;
 	private bool hudEnabled = false;
 	private bool choosingTeam = false;
+	private bool switchingTeam = false;
 	
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
@@ -90,6 +91,7 @@ public class guiGame : MonoBehaviour {
 			networkManager.EnterBattle(0);	
 			hudEnabled = true;
 		}
+		UpdateAllPlayers();
 	}
 		
 	IEnumerator FadeAudio (GameObject obj, float timer, Fade fadeType) {
@@ -132,11 +134,15 @@ public class guiGame : MonoBehaviour {
 		}
 	}
 	
-	public void UpdateAllPlayers() {
+	public void UpdateAllPlayers() {		
 		if (networkManager.gameType == 0) { // If FFA, just keep track of all the players
+			allPlayers.Clear();
 			allPlayers = networkManager.otherPlayers;
 			allPlayers.Add(networkManager.my);
 		} else { // If a team game, need to check who is on what team
+			redPlayers.Clear();
+			bluePlayers.Clear();
+			
 			foreach (Player p in networkManager.otherPlayers) {
 				if (p.team == 1) {
 					redPlayers.Add(p);
@@ -162,7 +168,9 @@ public class guiGame : MonoBehaviour {
 	public void ToggleHUD() {
 		if (hudEnabled) {
 			hudEnabled = false;	
-		} else { hudEnabled = true; }			
+		} else { 
+			hudEnabled = true; 
+		}			
 	}
 	
 	void OnGUI() {		
@@ -170,7 +178,7 @@ public class guiGame : MonoBehaviour {
 		spareAmmo = weaponController.GetWeaponSpareAmmo();
 		currentHealth = healthController.GetCurrentHP();
 		
-		if( choosingTeam ) {
+		if( choosingTeam ) { // true at start of game only
 			Screen.lockCursor = false;
 			movementController.inMenu = true;
 			weaponController.DisableWeapons();
@@ -184,7 +192,7 @@ public class guiGame : MonoBehaviour {
 				Screen.lockCursor = true;
 				movementController.inMenu = false;
 				weaponController.EnableWeapons();
-				networkManager.EnterBattle(1); // Enter the battle in team 1
+				networkManager.EnterBattle(1); // Enter the battle in team 1 (red)
 			}
 			if( GUI.Button(new Rect(Screen.width/2,Screen.height/2,300,40),"Blue Team",BlueTeamStyle) ) {
 				choosingTeam = false;
@@ -192,11 +200,40 @@ public class guiGame : MonoBehaviour {
 				Screen.lockCursor = true;
 				movementController.inMenu = false;
 				weaponController.EnableWeapons();
-				networkManager.EnterBattle(2); // Enter the battle in team 2
+				networkManager.EnterBattle(2); // Enter the battle in team 2 (blue)
 			}
 		}
 		
-		if( hudEnabled ) {
+		if( switchingTeam ) { // true if player selects the "switch team" option from the in-game menu
+			Screen.lockCursor = false;
+			movementController.inMenu = true;
+			hudEnabled = false;
+			weaponController.DisableWeapons();
+			
+			GUI.Label(new Rect(Screen.width/2, Screen.height/2-25,100,10),"Choose your team...",HUDStyle_small);
+			GUI.DrawTexture(new Rect(Screen.width/2-320, Screen.height/2-40,640,100), gui_background, ScaleMode.StretchToFill);
+			
+			if( GUI.Button(new Rect(Screen.width/2-300,Screen.height/2,300,40),"Red Team",RedTeamStyle) ) {
+				switchingTeam = false;
+				hudEnabled = true;
+				isMenuOpen = false;
+				Screen.lockCursor = true;
+				movementController.inMenu = false;
+				weaponController.EnableWeapons();
+				networkManager.networkView.RPC("SwitchTeam", RPCMode.All, networkManager.my.playerInfo, 1);
+			}
+			if( GUI.Button(new Rect(Screen.width/2,Screen.height/2,300,40),"Blue Team",BlueTeamStyle) ) {
+				switchingTeam = false;
+				hudEnabled = true;
+				isMenuOpen = false;
+				Screen.lockCursor = true;
+				movementController.inMenu = false;
+				weaponController.EnableWeapons();
+				networkManager.networkView.RPC("SwitchTeam", RPCMode.All, networkManager.my.playerInfo, 2);
+			}			
+		}
+		
+		if( hudEnabled ) { // true after team selection is complete (in a team match) or immediately at the start of the game (if free-for-all)
 
 			GUI.DrawTexture(new Rect(crosshair_xMin,crosshair_yMin,crosshairImage.width,crosshairImage.height),crosshairImage);
 			GUI.Label(new Rect(Screen.width-200,Screen.height-100,200,50),"Boosts: " + boostController.currBoosts,HUDStyle_small);
@@ -213,15 +250,27 @@ public class guiGame : MonoBehaviour {
 			
 		}
 			
-		if( isMenuOpen ) {
-			GUI.DrawTexture(new Rect(Screen.width-375,25,350,100),gameMenuBG,ScaleMode.StretchToFill);
+		if( isMenuOpen ) { // on pressing "escape"
+			if (networkManager.gameType == 0) {	// standard menu
+				GUI.DrawTexture(new Rect(Screen.width-375,25,350,100),gameMenuBG,ScaleMode.StretchToFill);
 			
-			if( GUI.Button(new Rect(Screen.width-350,40,300,40),"Exit to Main Menu",GameMenuStyle) ) {
-				NetworkManager.DisconnectFromServer();
+				if( GUI.Button(new Rect(Screen.width-350,40,300,40),"Exit to Main Menu",GameMenuStyle) ) {
+					NetworkManager.DisconnectFromServer();
+				}
+			} else { // menu with switch team option
+				GUI.DrawTexture(new Rect(Screen.width-375,25,350,150),gameMenuBG,ScaleMode.StretchToFill);
+			
+				if( GUI.Button(new Rect(Screen.width-350,40,300,40),"Exit to Main Menu",GameMenuStyle) ) {
+					NetworkManager.DisconnectFromServer();
+				}
+				
+				if( GUI.Button(new Rect(Screen.width-350,100,300,40),"Change Team",GameMenuStyle) ) {
+					switchingTeam = true;	
+				}				
 			}
 		}
 		
-		if( isScoreboardOpen || finalScoreboardOpen ) {
+		if( isScoreboardOpen || finalScoreboardOpen ) { // on pressing "tab"
 			
 			if (networkManager.gameType == 0) { // Free-for-all scoreboard (no team separation)
 			
@@ -230,7 +279,7 @@ public class guiGame : MonoBehaviour {
 				var newList = allPlayers.OrderByDescending(x => x.score).ToList();
 			
 				for (int i = 0; i < newList.Count; i++) {
-					if (networkManager.FindPlayer( newList[i].playerInfo ) == networkManager.my) {
+					if (networkManager.FindPlayer( newList[i].playerInfo ) == networkManager.my) { // Highlight the name/score in yellow if it's me
 						GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, MyScoreStyle);
 					} else {
 						GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, ScoreBoardStyle);
