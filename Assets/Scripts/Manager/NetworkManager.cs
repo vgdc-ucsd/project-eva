@@ -20,8 +20,8 @@ public class NetworkManager : MonoBehaviour {
 	const int MAX_CONNECTIONS = 16;
 	public List<Player> otherPlayers;
 	public Player my;
+	public int gameType; // 0 = FFA, 1 = Team DM
 	private int killsToWin;
-	private int gameType;
 	private guiGame mainGUI;
 	private GameManager gameManager;
 	private PlayerWeapons weaponController;
@@ -77,7 +77,7 @@ public class NetworkManager : MonoBehaviour {
 		my.team = team;
 		
 		// Tell other players we've connected
-		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, my.name, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
+		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, my.name, my.team, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
 
 		// Request each other player's state at the time of connection
 		networkView.RPC( "RequestIntialPlayerState", RPCMode.OthersBuffered, Network.player );	
@@ -150,7 +150,7 @@ public class NetworkManager : MonoBehaviour {
 
 	// Called when a player connects (server side)
 	void OnPlayerConnected( NetworkPlayer playerInfo ) {
-		//Tell the new player the kill limit
+		//Tell the new player the kill limit and gametype
 		networkView.RPC("SpecifyGameOptions", playerInfo, killsToWin, gameType);
 	}
 
@@ -197,27 +197,51 @@ public class NetworkManager : MonoBehaviour {
 	/////////////////////////
 	[RPC]
 	void RequestIntialPlayerState( NetworkPlayer requester ) {
-		networkView.RPC( "GetCurrentPlayerState", requester, my.playerInfo, my.name, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
+		networkView.RPC( "GetCurrentPlayerState", requester, my.playerInfo, my.name, my.team, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
 	}
 
 	[RPC]
-	void GetNewPlayerState( NetworkPlayer playerInfo, string playerName, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
+	void GetNewPlayerState( NetworkPlayer playerInfo, string playerName, int playerTeam, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
 		Player newPlayer = new Player();
 		newPlayer.playerInfo = playerInfo;
 		newPlayer.name = playerName;
 		GameObject playerAvatar = NetworkView.Find( avatarID ).gameObject;
 		newPlayer.avatar = playerAvatar;
+		newPlayer.team = playerTeam;
+		
+		if (gameType == 1) { // If team DM, assign teams at start of game
+			if (newPlayer.team != my.team) {
+				newPlayer.avatar.tag = "Player_enemy";
+			} else {
+				newPlayer.avatar.tag = "Player_ally";
+			}
+		} else if (gameType == 0) { // If FFA, all other players assigned as enemies
+			newPlayer.avatar.tag = 	"Player_enemy";
+		}
+		
 		otherPlayers.Add( newPlayer );
 	}
 
 	[RPC]
-	void GetCurrentPlayerState( NetworkPlayer playerInfo, string playerName, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
+	void GetCurrentPlayerState( NetworkPlayer playerInfo, string playerName, int playerTeam, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
 		Player newPlayer = new Player();
 		newPlayer.playerInfo = playerInfo;
 		newPlayer.name = playerName;
 		GameObject playerAvatar = gameManager.SpawnPlayer( initialPosition, initialRotation );
 		playerAvatar.networkView.viewID = avatarID;
 		newPlayer.avatar = playerAvatar;
+		newPlayer.team = playerTeam;
+		
+		if (gameType == 1) { // If team DM, assign teams at start of game
+			if (newPlayer.team != my.team) {
+				newPlayer.avatar.tag = "Player_enemy";
+			} else {
+				newPlayer.avatar.tag = "Player_ally";
+			}
+		} else if (gameType == 0) { // If FFA, all other players assigned as enemies
+			newPlayer.avatar.tag = 	"Player_enemy";
+		}
+			
 		otherPlayers.Add( newPlayer );
 	}
 

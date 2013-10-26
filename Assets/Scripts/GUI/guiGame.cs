@@ -9,6 +9,8 @@ public class guiGame : MonoBehaviour {
 	public Texture2D healthBar;
 	public Texture2D gameMenuBG;
 	public Texture2D scoreboardBG;
+	public Texture2D gui_background;
+	
 	public GUIStyle HUDStyle_large;
 	public GUIStyle HUDStyle_small;
 	public GUIStyle HPCountStyle;
@@ -38,7 +40,7 @@ public class guiGame : MonoBehaviour {
 	private bool isScoreboardOpen = false;
 	private bool finalScoreboardOpen = false;
 	private bool hudEnabled = false;
-	private bool choosingTeam = true;
+	private bool choosingTeam = false;
 	
 	enum Fade {In, Out};
 	float fadeOutTime = 2.0f;
@@ -79,6 +81,12 @@ public class guiGame : MonoBehaviour {
 				
 		crosshair_xMin = Screen.width/2 - ( crosshairImage.width/2 );
 		crosshair_yMin = Screen.height/2 - ( crosshairImage.height/2 );
+		
+		if (networkManager.gameType == 1) { // If team DM, draw team select buttons
+			choosingTeam = true;
+		} else {
+			hudEnabled = true;
+		}
 		
 		allPlayers = networkManager.otherPlayers;
 		allPlayers.Add(networkManager.my);
@@ -150,6 +158,9 @@ public class guiGame : MonoBehaviour {
 			Screen.lockCursor = false;
 			movementController.inMenu = true;
 			weaponController.DisableWeapons();
+			
+			GUI.Label(new Rect(Screen.width/2, Screen.height/2-25,100,10),"Choose your team...",HUDStyle_small);
+			GUI.DrawTexture(new Rect(Screen.width/2-320, Screen.height/2-40,640,100), gui_background, ScaleMode.StretchToFill);
 			
 			if( GUI.Button(new Rect(Screen.width/2-300,Screen.height/2,300,40),"Red Team",RedTeamStyle) ) {
 				choosingTeam = false;

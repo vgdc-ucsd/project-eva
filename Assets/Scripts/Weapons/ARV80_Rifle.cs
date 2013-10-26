@@ -111,9 +111,13 @@ public class ARV80_Rifle : Weapon_Stats {
 				//object hit, null if none hit
 				GameObject hitObject = hitInfo.collider.gameObject;
 
-				if ( hitObject.tag == "Player" ) {
+				if ( hitObject.tag == "Player_enemy" ) { //Send damage message only if player is an enemy
 					NetworkPlayer hitPlayer = hitInfo.collider.networkView.owner;
 					transform.parent.networkView.RPC ("InflictDamage", hitPlayer, damage, myViewID);
+				}
+				
+				if ( hitObject.tag == "Player_ally" ) {
+					Debug.Log("Friendly fire!");
 				}
 
 				if ( hitObject.tag == "Cover" ) {
