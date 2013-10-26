@@ -21,6 +21,9 @@ public class NetworkManager : MonoBehaviour {
 	public List<Player> otherPlayers;
 	public Player my;
 	public int gameType; // 0 = FFA, 1 = Team DM
+	public int redScore;
+	public int blueScore;
+	
 	private int killsToWin;
 	private guiGame mainGUI;
 	private GameManager gameManager;
@@ -125,6 +128,12 @@ public class NetworkManager : MonoBehaviour {
 		for (int i = 0; i < otherPlayers.Count; i++) {
 			otherPlayers[i].playerHealth = 100;
 			otherPlayers[i].score = 0;
+			
+			if (gameType == 1) {
+				redScore = 0;
+				blueScore = 0;
+			}
+			
 			gameManager.RespawnPlayer( otherPlayers[i].avatar );	
 		}
 	}
@@ -220,6 +229,7 @@ public class NetworkManager : MonoBehaviour {
 		}
 		
 		otherPlayers.Add( newPlayer );
+		mainGUI.UpdateAllPlayers();
 	}
 
 	[RPC]
@@ -243,6 +253,7 @@ public class NetworkManager : MonoBehaviour {
 		}
 			
 		otherPlayers.Add( newPlayer );
+		mainGUI.UpdateAllPlayers();
 	}
 
 	[RPC]
@@ -276,17 +287,46 @@ public class NetworkManager : MonoBehaviour {
 		// if killer is same as dead player (ie. suicide), then reduce dead player's score by 1
 		if (deadPlayerID == killerID) { 
 			deadPlayer.score--;
-		} else { // increase killer's score by one
 			
-			killerPlayer.score++;
-			if( killerPlayer.score >= killsToWin ) {
-				Debug.Log(killerPlayer.name + " won!");
+			if (gameType == 1) { // decrement team score if it's a team match
+				if (deadPlayer.team == 1) {
+					redScore--;
+				} else {
+					blueScore--;
+				}
+			}
+			
+		} else { // it's a normal kill, not a suicide
+			
+			killerPlayer.score++; // increase killer's score by one
+			
+			if (gameType == 1) { // increment/decrement team scores if it's a team match
+				if (killerPlayer.team == 1) {
+					redScore++;
+				} else {
+					blueScore++;
+				}	
 				
-				//open final scoreboard
-				mainGUI.ToggleFinalScoreboard();
+				if (redScore >= killsToWin || blueScore >= killsToWin) { // Check if a team won, if yes, end and restart the game
+					Debug.Log ("Team " + killerPlayer.team + " won!");
+					
+					//open final scoreboard
+					mainGUI.ToggleFinalScoreboard();
 				
-				//restart the level, respawn players
-				StartCoroutine( RestartMatch() );
+					//restart the level, respawn players
+					StartCoroutine( RestartMatch() );					
+				}
+			} else {
+
+				if( killerPlayer.score >= killsToWin ) {
+					Debug.Log(killerPlayer.name + " won!");
+				
+					//open final scoreboard
+					mainGUI.ToggleFinalScoreboard();
+				
+					//restart the level, respawn players
+					StartCoroutine( RestartMatch() );
+				}
 			}
 		}
 	}

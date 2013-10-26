@@ -35,6 +35,8 @@ public class guiGame : MonoBehaviour {
 	private GameObject BattleMusic;
 	private NetworkManager networkManager;
 	private List<Player> allPlayers;
+	private List<Player> redPlayers = new List<Player>();
+	private List<Player> bluePlayers = new List<Player>();
 	
 	private bool isMenuOpen = false;
 	private bool isScoreboardOpen = false;
@@ -88,9 +90,6 @@ public class guiGame : MonoBehaviour {
 			networkManager.EnterBattle(0);	
 			hudEnabled = true;
 		}
-		
-		allPlayers = networkManager.otherPlayers;
-		allPlayers.Add(networkManager.my);
 	}
 		
 	IEnumerator FadeAudio (GameObject obj, float timer, Fade fadeType) {
@@ -134,8 +133,24 @@ public class guiGame : MonoBehaviour {
 	}
 	
 	public void UpdateAllPlayers() {
-		allPlayers = networkManager.otherPlayers;
-		allPlayers.Add(networkManager.my);
+		if (networkManager.gameType == 0) { // If FFA, just keep track of all the players
+			allPlayers = networkManager.otherPlayers;
+			allPlayers.Add(networkManager.my);
+		} else { // If a team game, need to check who is on what team
+			foreach (Player p in networkManager.otherPlayers) {
+				if (p.team == 1) {
+					redPlayers.Add(p);
+				} else { 
+					bluePlayers.Add(p);
+				}
+			}
+			
+			if (networkManager.my.team == 1) { // Add self to the list
+				redPlayers.Add(networkManager.my);
+			} else {
+				bluePlayers.Add(networkManager.my);
+			}
+		}
 	}
 	
 	public void ToggleFinalScoreboard() {
@@ -207,20 +222,54 @@ public class guiGame : MonoBehaviour {
 		}
 		
 		if( isScoreboardOpen || finalScoreboardOpen ) {
-			GUI.DrawTexture(new Rect(50,50,Screen.width-100,Screen.height-150),scoreboardBG,ScaleMode.StretchToFill);
 			
-			var newList = allPlayers.OrderByDescending(x => x.score).ToList();
+			if (networkManager.gameType == 0) { // Free-for-all scoreboard (no team separation)
 			
-			for (int i = 0; i < newList.Count; i++) {
-				if (networkManager.FindPlayer( newList[i].playerInfo ) == networkManager.my) {
-					GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, MyScoreStyle);
-				} else {
-					GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, ScoreBoardStyle);
+				GUI.DrawTexture(new Rect(50,50,Screen.width-100,Screen.height-150),scoreboardBG,ScaleMode.StretchToFill);
+			
+				var newList = allPlayers.OrderByDescending(x => x.score).ToList();
+			
+				for (int i = 0; i < newList.Count; i++) {
+					if (networkManager.FindPlayer( newList[i].playerInfo ) == networkManager.my) {
+						GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, MyScoreStyle);
+					} else {
+						GUI.Label(new Rect(150,100 + (i+1)*50,500,20), newList[i].name + "  " + newList[i].score, ScoreBoardStyle);
+					}
 				}
-			}
 			
-			if( finalScoreboardOpen ) {
-				GUI.Label(new Rect(300,Screen.height - 300,500,20), newList[0].name + " wins!", ScoreBoardStyle);				
+				if( finalScoreboardOpen ) {
+					GUI.Label(new Rect(300,Screen.height - 300,500,20), newList[0].name + " wins!", ScoreBoardStyle);				
+				}
+			
+			} else { // Team scoreboard
+			
+				GUI.DrawTexture(new Rect(50,50,Screen.width-100,Screen.height-150),scoreboardBG,ScaleMode.StretchToFill);
+			
+				var redList = redPlayers.OrderByDescending(x => x.score).ToList();
+				var blueList = bluePlayers.OrderByDescending(x => x.score).ToList();
+				
+				GUI.Label(new Rect(150, 100, 500, 20), "Red score: " + networkManager.redScore, ScoreBoardStyle);
+				GUI.Label(new Rect(Screen.width/2+50, 100, 500, 20), "Blue score: " + networkManager.blueScore, ScoreBoardStyle);
+				
+				for (int r = 0; r < redList.Count; r++) { //print out red team's scores
+					
+					if (networkManager.FindPlayer( redList[r].playerInfo ) == networkManager.my) {
+						GUI.Label(new Rect(150, 150 + (r+1)*50,500,20), redList[r].name + "  " + redList[r].score, MyScoreStyle);
+					} else {
+						GUI.Label(new Rect(150, 150 + (r+1)*50,500,20), redList[r].name + "  " + redList[r].score, ScoreBoardStyle);
+					}					
+				}
+				for (int b = 0; b < redList.Count; b++) { //print out blue team's scores
+					
+					if (networkManager.FindPlayer( blueList[b].playerInfo ) == networkManager.my) {
+						GUI.Label(new Rect(Screen.width/2+50, 150 + (b+1)*50,500,20), blueList[b].name + "  " + blueList[b].score, MyScoreStyle);
+					} else {
+						GUI.Label(new Rect(Screen.width/2+50, 150 + (b+1)*50,500,20), blueList[b].name + "  " + blueList[b].score, ScoreBoardStyle);
+					}				
+				}
+				
+				// Include message saying which team won
+				
 			}
 		}
 	}
