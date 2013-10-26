@@ -84,7 +84,8 @@ public class guiGame : MonoBehaviour {
 		
 		if (networkManager.gameType == 1) { // If team DM, draw team select buttons
 			choosingTeam = true;
-		} else {
+		} else { // If FFA, enter the battle immediately as team "zero" (no team selection)
+			networkManager.EnterBattle(0);	
 			hudEnabled = true;
 		}
 		

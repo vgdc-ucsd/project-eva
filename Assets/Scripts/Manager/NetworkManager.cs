@@ -70,11 +70,11 @@ public class NetworkManager : MonoBehaviour {
 		weaponController = myAvatar.GetComponent<PlayerWeapons>();
 		
 		my.name = mainGUI.id;
-		
 	}
 	
 	public void EnterBattle(int team) {
-		my.team = team;
+		my.team = team; // If team is zero, the value in the Player class is still assigned, but not used
+		// Team 1 = "Red", Team 2 = "Blue" (placeholders)
 		
 		// Tell other players we've connected
 		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, my.name, my.team, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
