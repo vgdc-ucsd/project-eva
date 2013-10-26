@@ -287,7 +287,7 @@ public class guiGame : MonoBehaviour {
 				}
 			
 				if( finalScoreboardOpen ) {
-					GUI.Label(new Rect(300,Screen.height - 300,500,20), newList[0].name + " wins!", ScoreBoardStyle);				
+					GUI.Label(new Rect(300, Screen.height-300, 500, 20), newList[0].name + " wins!", ScoreBoardStyle);				
 				}
 			
 			} else { // Team scoreboard
@@ -317,8 +317,13 @@ public class guiGame : MonoBehaviour {
 					}				
 				}
 				
-				// Include message saying which team won
-				
+				if( finalScoreboardOpen ) {
+					if (networkManager.redScore > networkManager.blueScore) {
+						GUI.Label(new Rect(300, Screen.height-300, 500, 20),"Red team wins!",ScoreBoardStyle);
+					} else {
+						GUI.Label(new Rect(300, Screen.height-300, 500, 20),"Blue team wins!",ScoreBoardStyle);
+					}
+				}
 			}
 		}
 	}
