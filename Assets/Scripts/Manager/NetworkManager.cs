@@ -20,8 +20,11 @@ public class NetworkManager : MonoBehaviour {
 	const int MAX_CONNECTIONS = 16;
 	public List<Player> otherPlayers;
 	public Player my;
+	public int gameType; // 0 = FFA, 1 = Team DM
+	public int redScore;
+	public int blueScore;
+	
 	private int killsToWin;
-	private int gameType;
 	private guiGame mainGUI;
 	private GameManager gameManager;
 	private PlayerWeapons weaponController;
@@ -70,14 +73,14 @@ public class NetworkManager : MonoBehaviour {
 		weaponController = myAvatar.GetComponent<PlayerWeapons>();
 		
 		my.name = mainGUI.id;
-		
 	}
 	
 	public void EnterBattle(int team) {
-		my.team = team;
+		my.team = team; // If team is zero, the value in the Player class is still assigned, but not used
+		// Team 1 = "Red", Team 2 = "Blue" (placeholders)
 		
 		// Tell other players we've connected
-		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, my.name, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
+		networkView.RPC( "GetNewPlayerState", RPCMode.Others, my.playerInfo, my.name, my.team, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
 
 		// Request each other player's state at the time of connection
 		networkView.RPC( "RequestIntialPlayerState", RPCMode.OthersBuffered, Network.player );	
@@ -125,6 +128,12 @@ public class NetworkManager : MonoBehaviour {
 		for (int i = 0; i < otherPlayers.Count; i++) {
 			otherPlayers[i].playerHealth = 100;
 			otherPlayers[i].score = 0;
+			
+			if (gameType == 1) {
+				redScore = 0;
+				blueScore = 0;
+			}
+			
 			gameManager.RespawnPlayer( otherPlayers[i].avatar );	
 		}
 	}
@@ -150,7 +159,7 @@ public class NetworkManager : MonoBehaviour {
 
 	// Called when a player connects (server side)
 	void OnPlayerConnected( NetworkPlayer playerInfo ) {
-		//Tell the new player the kill limit
+		//Tell the new player the kill limit and gametype
 		networkView.RPC("SpecifyGameOptions", playerInfo, killsToWin, gameType);
 	}
 
@@ -197,28 +206,54 @@ public class NetworkManager : MonoBehaviour {
 	/////////////////////////
 	[RPC]
 	void RequestIntialPlayerState( NetworkPlayer requester ) {
-		networkView.RPC( "GetCurrentPlayerState", requester, my.playerInfo, my.name, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
+		networkView.RPC( "GetCurrentPlayerState", requester, my.playerInfo, my.name, my.team, my.avatar.networkView.viewID, my.avatar.transform.position, my.avatar.transform.rotation );
 	}
 
 	[RPC]
-	void GetNewPlayerState( NetworkPlayer playerInfo, string playerName, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
+	void GetNewPlayerState( NetworkPlayer playerInfo, string playerName, int playerTeam, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
 		Player newPlayer = new Player();
 		newPlayer.playerInfo = playerInfo;
 		newPlayer.name = playerName;
 		GameObject playerAvatar = NetworkView.Find( avatarID ).gameObject;
 		newPlayer.avatar = playerAvatar;
+		newPlayer.team = playerTeam;
+		
+		if (gameType == 1) { // If team DM, assign teams at start of game
+			if (newPlayer.team != my.team) {
+				newPlayer.avatar.tag = "Player_enemy";
+			} else {
+				newPlayer.avatar.tag = "Player_ally";
+			}
+		} else if (gameType == 0) { // If FFA, all other players assigned as enemies
+			newPlayer.avatar.tag = 	"Player_enemy";
+		}
+		
 		otherPlayers.Add( newPlayer );
+		mainGUI.UpdateAllPlayers();
 	}
 
 	[RPC]
-	void GetCurrentPlayerState( NetworkPlayer playerInfo, string playerName, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
+	void GetCurrentPlayerState( NetworkPlayer playerInfo, string playerName, int playerTeam, NetworkViewID avatarID, Vector3 initialPosition, Quaternion initialRotation ) {
 		Player newPlayer = new Player();
 		newPlayer.playerInfo = playerInfo;
 		newPlayer.name = playerName;
 		GameObject playerAvatar = gameManager.SpawnPlayer( initialPosition, initialRotation );
 		playerAvatar.networkView.viewID = avatarID;
 		newPlayer.avatar = playerAvatar;
+		newPlayer.team = playerTeam;
+		
+		if (gameType == 1) { // If team DM, assign teams at start of game
+			if (newPlayer.team != my.team) {
+				newPlayer.avatar.tag = "Player_enemy";
+			} else {
+				newPlayer.avatar.tag = "Player_ally";
+			}
+		} else if (gameType == 0) { // If FFA, all other players assigned as enemies
+			newPlayer.avatar.tag = 	"Player_enemy";
+		}
+			
 		otherPlayers.Add( newPlayer );
+		mainGUI.UpdateAllPlayers();
 	}
 
 	[RPC]
@@ -245,6 +280,18 @@ public class NetworkManager : MonoBehaviour {
 	}
 	
 	[RPC]
+	void SwitchTeam( NetworkPlayer switchingPlayer, int newTeam ) {
+		Player switcher = FindPlayer( switchingPlayer );
+		
+		if (newTeam != switcher.team) {
+			switcher.team = newTeam;
+
+			
+			mainGUI.UpdateAllPlayers();
+		}
+	}
+	
+	[RPC]
 	void ReportDeath( NetworkViewID deadPlayerID, NetworkViewID killerID ) {
 		Player deadPlayer = FindPlayerByViewID( deadPlayerID );
 		Player killerPlayer = FindPlayerByViewID( killerID );
@@ -252,17 +299,46 @@ public class NetworkManager : MonoBehaviour {
 		// if killer is same as dead player (ie. suicide), then reduce dead player's score by 1
 		if (deadPlayerID == killerID) { 
 			deadPlayer.score--;
-		} else { // increase killer's score by one
 			
-			killerPlayer.score++;
-			if( killerPlayer.score >= killsToWin ) {
-				Debug.Log(killerPlayer.name + " won!");
+			if (gameType == 1) { // decrement team score if it's a team match
+				if (deadPlayer.team == 1) {
+					redScore--;
+				} else {
+					blueScore--;
+				}
+			}
+			
+		} else { // it's a normal kill, not a suicide
+			
+			killerPlayer.score++; // increase killer's score by one
+			
+			if (gameType == 1) { // increment/decrement team scores if it's a team match
+				if (killerPlayer.team == 1) {
+					redScore++;
+				} else {
+					blueScore++;
+				}	
 				
-				//open final scoreboard
-				mainGUI.ToggleFinalScoreboard();
+				if (redScore >= killsToWin || blueScore >= killsToWin) { // Check if a team won, if yes, end and restart the game
+					Debug.Log ("Team " + killerPlayer.team + " won!");
+					
+					//open final scoreboard
+					mainGUI.ToggleFinalScoreboard();
 				
-				//restart the level, respawn players
-				StartCoroutine( RestartMatch() );
+					//restart the level, respawn players
+					StartCoroutine( RestartMatch() );					
+				}
+			} else {
+
+				if( killerPlayer.score >= killsToWin ) {
+					Debug.Log(killerPlayer.name + " won!");
+				
+					//open final scoreboard
+					mainGUI.ToggleFinalScoreboard();
+				
+					//restart the level, respawn players
+					StartCoroutine( RestartMatch() );
+				}
 			}
 		}
 	}
