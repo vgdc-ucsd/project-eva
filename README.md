@@ -16,10 +16,12 @@ Controls
 * Space and left-control to go up/down
 * Q and E to rotate left and right
 * Z to boost
+* Left shift to slow down / stop
 * C to attach yourself to an asteroid when it is highlighted in green (youll be able to translate freely around the asteroid)
 * Left mouse to shoot
 
-
+About
+--------
 Project EVA is a multiplayer cover-based shooter set in deep space. Players combat each other in all three dimensions in a frictionless vacuum, using space debris as cover.
 
 Features
